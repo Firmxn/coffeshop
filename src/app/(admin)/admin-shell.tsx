@@ -69,7 +69,7 @@ export default function AdminShell({ children, userEmail }: AdminShellProps) {
                         <Link href="/admin" className="flex items-center gap-2">
                             <Coffee className="h-7 w-7 text-primary" />
                             <span className="font-heading text-lg font-bold text-foreground">
-                                ARC<span className="text-red-600">offee</span>
+                                ARC<span className="text-primary">offee</span>
                             </span>
                         </Link>
                         <Button

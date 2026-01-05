@@ -35,7 +35,7 @@ export default function Header() {
                 <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
                     <Coffee className="h-7 w-7 text-primary" />
                     <span className="font-heading text-xl font-bold tracking-tight text-foreground">
-                        ARC<span className="text-red-600">offee</span>
+                        ARC<span className="text-primary">offee</span>
                     </span>
                 </Link>
 
@@ -95,7 +95,7 @@ export default function Header() {
                                 <SheetHeader className="border-b border-border px-6 py-4">
                                     <SheetTitle className="flex items-center gap-2">
                                         <Coffee className="h-6 w-6 text-primary" />
-                                        <span className="font-heading text-foreground">ARC<span className="text-red-600">offee</span></span>
+                                        <span className="font-heading text-foreground">ARC<span className="text-primary">offee</span></span>
                                     </SheetTitle>
                                 </SheetHeader>
 
@@ -111,8 +111,8 @@ export default function Header() {
                                                 href={link.href}
                                                 onClick={() => setIsMobileMenuOpen(false)}
                                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive
-                                                        ? "bg-primary text-primary-foreground"
-                                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                                    ? "bg-primary text-primary-foreground"
+                                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                                     }`}
                                             >
                                                 <link.icon className="h-5 w-5" />

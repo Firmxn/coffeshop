@@ -54,21 +54,22 @@ export default async function HomePage() {
                         <div className="max-w-xl">
                             <h1 className="font-heading text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
                                 Kopi Premium,{" "}
+                                <br className="sm:hidden" />
                                 <span className="text-gradient-coffee">Sesuai Seleramu</span>
                             </h1>
-                            <p className="mt-6 text-lg text-muted-foreground">
+                            <p className="mt-6 text-base sm:text-lg text-muted-foreground">
                                 Nikmati pengalaman kopi yang berbeda. Pilih menu favorit,
                                 kustomisasi sesuai selera, dan rasakan kesempurnaan di setiap tegukan.
                             </p>
-                            <div className="mt-8 flex flex-wrap gap-4">
-                                <Link href="/menu">
-                                    <Button size="lg" className="gap-2">
+                            <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                <Link href="/menu" className="w-full sm:w-auto">
+                                    <Button size="lg" className="gap-2 w-full sm:w-auto">
                                         Lihat Menu
                                         <ArrowRight className="h-4 w-4" />
                                     </Button>
                                 </Link>
-                                <Link href="/tentang">
-                                    <Button size="lg" variant="outline">
+                                <Link href="/tentang" className="w-full sm:w-auto">
+                                    <Button size="lg" variant="outline" className="w-full sm:w-auto">
                                         Tentang Kami
                                     </Button>
                                 </Link>

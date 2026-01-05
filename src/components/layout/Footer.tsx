@@ -38,8 +38,8 @@ export default function Footer() {
                     <div className="lg:col-span-2">
                         <Link href="/" className="flex items-center gap-2">
                             <Coffee className="h-8 w-8 text-primary" />
-                            <span className="font-heading text-2xl font-bold tracking-tight">
-                                AR<span className="text-accent">Coffee</span>
+                            <span className="font-heading text-2xl font-bold tracking-tight text-foreground">
+                                ARC<span className="text-primary">offee</span>
                             </span>
                         </Link>
                         <p className="mt-4 max-w-sm text-sm text-muted-foreground">
