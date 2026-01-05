@@ -59,8 +59,8 @@ export interface Order {
     customerName: string;
     customerPhone: string;
     notes?: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string; // ISO string dari localStorage
+    updatedAt?: string; // ISO string dari localStorage
 }
 
 // Status pesanan
