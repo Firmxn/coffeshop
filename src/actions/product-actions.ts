@@ -6,6 +6,56 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { productSchema, ProductFormData } from "@/lib/schemas";
 
 
+// Upload Image
+export async function uploadProductImage(formData: FormData) {
+    const supabase = createAdminClient();
+    const file = formData.get("file") as File;
+
+    if (!file) return { success: false, error: "Tidak ada file yang diunggah" };
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    // Upload ke bucket 'products'
+    const { error: uploadError } = await supabase.storage
+        .from("products")
+        .upload(filePath, file, {
+            contentType: file.type,
+            upsert: false,
+        });
+
+    if (uploadError) {
+        // Jika error karena bucket belum ada, coba buat bucket baru
+        if (uploadError.message.includes("not found") || uploadError.message.includes("Bucket")) { // Supabase error message varies
+            const { error: createBucketError } = await supabase.storage.createBucket("products", {
+                public: true,
+            });
+
+            if (createBucketError) {
+                console.error("Gagal membuat bucket:", createBucketError);
+                return { success: false, error: "Gagal konfigurasi storage" };
+            }
+
+            // Retry upload
+            const { error: retryError } = await supabase.storage
+                .from("products")
+                .upload(filePath, file, { upsert: false, contentType: file.type });
+
+            if (retryError) {
+                return { success: false, error: retryError.message };
+            }
+        } else {
+            console.error("Upload error:", uploadError);
+            return { success: false, error: uploadError.message };
+        }
+    }
+
+    // Get Public URL
+    const { data } = supabase.storage.from("products").getPublicUrl(filePath);
+    return { success: true, url: data.publicUrl };
+}
+
 // Create Product
 export async function createProduct(data: ProductFormData) {
     const supabase = createAdminClient();

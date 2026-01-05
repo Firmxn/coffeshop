@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import {
     createProduct,
     updateProduct,
+    uploadProductImage,
 } from "@/actions/product-actions";
 import { productSchema, ProductFormData } from "@/lib/schemas";
 import { Category } from "@/types";
@@ -71,6 +72,8 @@ export function ProductDialog({
     };
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [filePreview, setFilePreview] = useState<string | null>(null);
 
     const form = useForm<ProductFormData>({
         resolver: zodResolver(productSchema) as any, // Cast to any to handle coercion types
@@ -87,11 +90,28 @@ export function ProductDialog({
     const onSubmit = async (data: ProductFormData) => {
         setIsSubmitting(true);
         try {
+            let imageUrl = data.image;
+
+            // Jika user memilih file baru, upload dulu
+            if (selectedFile) {
+                const formData = new FormData();
+                formData.append("file", selectedFile);
+
+                const uploadRes = await uploadProductImage(formData);
+                if (!uploadRes.success || !uploadRes.url) {
+                    throw new Error(uploadRes.error || "Gagal mengupload gambar");
+                }
+                imageUrl = uploadRes.url;
+            }
+
+            // Update URL image di payload data
+            const productData = { ...data, image: imageUrl };
+
             let result;
             if (productToEdit) {
-                result = await updateProduct(productToEdit.id, data);
+                result = await updateProduct(productToEdit.id, productData);
             } else {
-                result = await createProduct(data);
+                result = await createProduct(productData);
             }
 
             if (result.success) {
@@ -102,6 +122,8 @@ export function ProductDialog({
                 );
                 setOpen(false);
                 form.reset();
+                setSelectedFile(null);
+                setFilePreview(null);
                 if (onSuccess) onSuccess();
             } else {
                 toast.error(result.error);
@@ -188,15 +210,47 @@ export function ProductDialog({
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="image">URL Gambar</Label>
-                        <Input
-                            id="image"
-                            {...form.register("image")}
-                            placeholder="https://example.com/image.jpg"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            *Masukkan URL gambar eksternal (sementara)
-                        </p>
+                        <Label>Gambar Produk</Label>
+
+                        {/* Preview Area */}
+                        {(filePreview || form.watch("image")) && (
+                            <div className="relative w-full h-48 bg-muted rounded-md overflow-hidden border">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src={filePreview || form.watch("image") || ""}
+                                    alt="Preview"
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                        )}
+
+                        <div className="flex flex-col gap-2">
+                            <Label htmlFor="file-upload" className="text-xs text-muted-foreground">Upload Gambar Baru</Label>
+                            <Input
+                                id="file-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        setSelectedFile(file);
+                                        setFilePreview(URL.createObjectURL(file));
+                                        // Optional: Clear manual URL input if file selected to avoid confusion? 
+                                        // Or keep it as fallback.
+                                    }
+                                }}
+                                className="cursor-pointer"
+                            />
+                        </div>
+
+                        <div className="space-y-1">
+                            <Label htmlFor="image" className="text-xs text-muted-foreground">Atau masukkan URL Manual</Label>
+                            <Input
+                                id="image"
+                                {...form.register("image")}
+                                placeholder="https://example.com/image.jpg"
+                            />
+                        </div>
                     </div>
 
                     <div className="flex items-center space-x-2">
