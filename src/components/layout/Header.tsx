@@ -13,11 +13,13 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { useCartStore } from "@/stores/cart-store";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 // Link navigasi utama
 const navLinks = [
     { label: "Beranda", href: "/" },
     { label: "Menu", href: "/menu" },
+    { label: "Tentang", href: "/tentang" },
     { label: "Lacak Pesanan", href: "/track" },
 ];
 
@@ -74,6 +76,9 @@ export default function Header() {
                             <span className="sr-only">Keranjang belanja</span>
                         </Button>
                     </Link>
+
+                    {/* Theme Toggle */}
+                    <ThemeToggle />
 
                     {/* Mobile Menu Toggle */}
                     <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
