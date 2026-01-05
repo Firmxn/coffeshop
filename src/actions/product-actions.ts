@@ -18,7 +18,7 @@ export type ProductFormData = z.infer<typeof productSchema>;
 
 // Create Product
 export async function createProduct(data: ProductFormData) {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     try {
         // Validasi input
@@ -30,7 +30,7 @@ export async function createProduct(data: ProductFormData) {
             description: validatedData.description,
             price: validatedData.price,
             category_id: validatedData.category_id,
-            image: validatedData.image || null,
+            image_url: validatedData.image || null,
             is_available: validatedData.is_available,
             slug: validatedData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"), // Simple slug gen
         });
@@ -47,7 +47,7 @@ export async function createProduct(data: ProductFormData) {
     } catch (error) {
         console.error("Create product unknown error:", error);
         if (error instanceof z.ZodError) {
-            return { success: false, error: error.errors[0].message };
+            return { success: false, error: (error as any).errors[0].message };
         }
         return { success: false, error: "Gagal membuat produk" };
     }
@@ -55,7 +55,7 @@ export async function createProduct(data: ProductFormData) {
 
 // Update Product
 export async function updateProduct(id: string, data: ProductFormData) {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     try {
         const validatedData = productSchema.parse(data);
@@ -67,7 +67,7 @@ export async function updateProduct(id: string, data: ProductFormData) {
                 description: validatedData.description,
                 price: validatedData.price,
                 category_id: validatedData.category_id,
-                image: validatedData.image || null,
+                image_url: validatedData.image || null,
                 is_available: validatedData.is_available,
                 // Slug bisa diupdate jika nama berubah, atau biarkan tetap
                 slug: validatedData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
@@ -86,13 +86,16 @@ export async function updateProduct(id: string, data: ProductFormData) {
 
     } catch (error) {
         console.error("Update product error:", error);
+        if (error instanceof z.ZodError) {
+            return { success: false, error: (error as any).errors[0].message };
+        }
         return { success: false, error: "Gagal mengupdate produk" };
     }
 }
 
 // Delete Product
 export async function deleteProduct(id: string) {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     try {
         const { error } = await supabase.from("products").delete().eq("id", id);

@@ -131,7 +131,7 @@ export default function ProductsTable({ products, categories }: ProductsTablePro
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
+                                <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-primary/10 to-accent/10">
                                     <Coffee className="h-12 w-12 text-primary/30" />
                                 </div>
                             )}

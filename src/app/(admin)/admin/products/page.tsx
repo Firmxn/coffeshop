@@ -5,7 +5,7 @@ import ProductsTable, { AdminProduct } from "./ProductsTable";
 export const revalidate = 0;
 
 export default async function AdminProductsPage() {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Fetch Products with Category Name
     const { data: products, error } = await supabase
@@ -19,7 +19,12 @@ export default async function AdminProductsPage() {
     }
 
     // Fetch Categories for dropdown
-    const categories = await getCategories();
+    const categoriesRaw = await getCategories();
+    const categories = categoriesRaw.map(cat => ({
+        ...cat,
+        description: cat.description || undefined,
+        image: cat.image_url || undefined
+    }));
 
     // Mapping data if necessary, though Supabase result should match AdminProduct largely
     // AdminProduct expects: categories: { name: string } | null

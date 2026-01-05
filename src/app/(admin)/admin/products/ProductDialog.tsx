@@ -62,12 +62,19 @@ export function ProductDialog({
     const [internalOpen, setInternalOpen] = useState(false);
     const isControlled = controlledOpen !== undefined;
     const open = isControlled ? controlledOpen : internalOpen;
-    const setOpen = isControlled ? setControlledOpen : setInternalOpen;
+
+    const setOpen = (value: boolean) => {
+        if (isControlled) {
+            if (setControlledOpen) setControlledOpen(value);
+        } else {
+            setInternalOpen(value);
+        }
+    };
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<ProductFormData>({
-        resolver: zodResolver(productSchema),
+        resolver: zodResolver(productSchema) as any, // Cast to any to handle coercion types
         defaultValues: {
             name: productToEdit?.name || "",
             description: productToEdit?.description || "",
@@ -96,7 +103,7 @@ export function ProductDialog({
                 );
                 setOpen(false);
                 form.reset();
-                onSuccess?.();
+                if (onSuccess) onSuccess();
             } else {
                 toast.error(result.error);
             }
