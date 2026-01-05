@@ -132,7 +132,7 @@ export default function AdminLayout({
                     {/* Admin User Info & Logout Dropdown */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="relative h-10 w-auto rounded-full px-2 hover:bg-muted hover:text-foreground">
+                            <Button variant="ghost" className="relative h-auto py-2 px-4 w-auto rounded-full hover:bg-muted hover:text-foreground">
                                 <div className="flex items-center gap-3">
                                     <div className="text-right hidden sm:block">
                                         <p className="text-sm font-medium text-foreground">Admin Barista</p>
