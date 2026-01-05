@@ -165,7 +165,7 @@ export default function OptionsTable({ options }: OptionsTableProps) {
                                 setCurrentPage(1);
                             }}
                         >
-                            <SelectTrigger className="h-8 w-[70px]">
+                            <SelectTrigger className="h-8 w-[80px]">
                                 <SelectValue placeholder={itemsPerPage} />
                             </SelectTrigger>
                             <SelectContent side="top">
