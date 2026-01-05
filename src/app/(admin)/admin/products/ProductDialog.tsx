@@ -107,7 +107,8 @@ export function ProductDialog({
                 toast.error(result.error);
             }
         } catch (error) {
-            toast.error("Terjadi kesalahan");
+            console.error("Form submission error:", error);
+            toast.error(error instanceof Error ? error.message : "Terjadi kesalahan saat menyimpan");
         } finally {
             setIsSubmitting(false);
         }
