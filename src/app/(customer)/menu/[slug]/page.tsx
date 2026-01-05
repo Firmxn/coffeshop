@@ -1,12 +1,16 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { products, getProductBySlug } from "@/data/mock-data";
+import { getProductBySlug, getAllProductSlugs } from "@/lib/supabase/queries";
 import ProductDetailClient from "./ProductDetailClient";
+
+// Revalidasi setiap jam
+export const revalidate = 3600;
 
 // Generate static params untuk semua produk
 export async function generateStaticParams() {
-    return products.map((product) => ({
-        slug: product.slug,
+    const slugs = await getAllProductSlugs();
+    return slugs.map((slug) => ({
+        slug,
     }));
 }
 
@@ -17,7 +21,7 @@ export async function generateMetadata({
     params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
     const { slug } = await params;
-    const product = getProductBySlug(slug);
+    const product = await getProductBySlug(slug);
 
     if (!product) {
         return {
@@ -38,11 +42,12 @@ export default async function ProductDetailPage({
     params: Promise<{ slug: string }>;
 }) {
     const { slug } = await params;
-    const product = getProductBySlug(slug);
+    const product = await getProductBySlug(slug);
 
     if (!product) {
         notFound();
     }
 
-    return <ProductDetailClient slug={slug} />;
+    // Pass product data to client component
+    return <ProductDetailClient product={product} />;
 }

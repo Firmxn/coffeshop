@@ -20,7 +20,6 @@ const navLinks = [
     { label: "Beranda", href: "/" },
     { label: "Menu", href: "/menu" },
     { label: "Tentang", href: "/tentang" },
-    { label: "Lacak Pesanan", href: "/track" },
 ];
 
 export default function Header() {

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, Coffee, Star, Truck, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { categories, products, formatPrice } from "@/data/mock-data";
+import { getCategories, getProducts } from "@/lib/supabase/queries";
+import { formatPrice } from "@/lib/utils";
 
-// Featured products (ambil 4 produk pertama)
-const featuredProducts = products.slice(0, 4);
+// Revalidasi setiap jam
+export const revalidate = 3600;
 
 // USP (Unique Selling Points)
 const features = [
@@ -30,7 +31,19 @@ const features = [
     },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+    // Fetch data
+    const categoriesPromise = getCategories();
+    const productsPromise = getProducts();
+
+    const [categories, products] = await Promise.all([
+        categoriesPromise,
+        productsPromise,
+    ]);
+
+    // Featured products (ambil 4 produk pertama)
+    const featuredProducts = products.slice(0, 4);
+
     return (
         <>
             {/* Hero Section */}
@@ -166,8 +179,16 @@ export default function HomePage() {
                                 className="group rounded-2xl bg-card p-4 shadow-sm transition-all hover:shadow-md"
                             >
                                 {/* Product Image Placeholder */}
-                                <div className="aspect-square rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center overflow-hidden">
-                                    <Coffee className="h-16 w-16 text-primary/30 transition-transform group-hover:scale-110" />
+                                <div className="aspect-square rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center overflow-hidden relative">
+                                    {product.image_url ? (
+                                        <img
+                                            src={product.image_url}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                                        />
+                                    ) : (
+                                        <Coffee className="h-16 w-16 text-primary/30 transition-transform group-hover:scale-110" />
+                                    )}
                                 </div>
                                 {/* Product Info */}
                                 <div className="mt-4">

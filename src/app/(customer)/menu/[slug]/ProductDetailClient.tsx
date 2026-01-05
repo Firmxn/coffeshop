@@ -6,19 +6,14 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Coffee, Minus, Plus, ShoppingBag, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-    products,
-    options,
-    formatPrice,
-    getProductBySlug,
-    getOptionsByGroup
-} from "@/data/mock-data";
+import { formatPrice } from "@/lib/utils";
 import { useCartStore } from "@/stores/cart-store";
-import { Option, OptionGroup } from "@/types";
+import { Option as OptionType, OptionGroup } from "@/types"; // Use global types
+import { ProductWithOptions, Option as DbOption } from "@/lib/supabase/types";
 import { toast } from "sonner";
 
 // Mapping group ke label
-const groupLabels: Record<OptionGroup, string> = {
+const groupLabels: Record<string, string> = {
     size: "Ukuran",
     ice: "Level Es",
     sugar: "Level Gula",
@@ -26,46 +21,31 @@ const groupLabels: Record<OptionGroup, string> = {
 };
 
 interface ProductDetailClientProps {
-    slug: string;
+    product: ProductWithOptions;
 }
 
-export default function ProductDetailClient({ slug }: ProductDetailClientProps) {
+export default function ProductDetailClient({ product }: ProductDetailClientProps) {
     const router = useRouter();
-    const product = getProductBySlug(slug);
     const addItem = useCartStore((state) => state.addItem);
+
+    // Transform data product options dari DB structure ke flat array of options
+    const allOptions = product.product_options.map((po) => po.options);
 
     // State untuk kustomisasi
     const [quantity, setQuantity] = useState(1);
-    const [selectedOptions, setSelectedOptions] = useState<Option[]>([]);
+    const [selectedOptions, setSelectedOptions] = useState<DbOption[]>([]);
     const [notes, setNotes] = useState("");
 
-    // Jika produk tidak ditemukan
-    if (!product) {
-        return (
-            <div className="py-20 text-center">
-                <Coffee className="mx-auto h-16 w-16 text-muted-foreground/30" />
-                <h3 className="mt-4 font-heading text-xl font-semibold">
-                    Produk tidak ditemukan
-                </h3>
-                <Link href="/menu" className="mt-4 inline-block">
-                    <Button>Kembali ke Menu</Button>
-                </Link>
-            </div>
-        );
-    }
-
     // Grup opsi yang tersedia untuk produk ini
-    const availableGroups = [...new Set(product.options.map((po) => po.option.group))];
+    const availableGroups = [...new Set(allOptions.map((opt) => opt.group_name))];
 
     // Ambil opsi berdasarkan grup dari produk
-    const getProductOptionsByGroup = (group: OptionGroup) => {
-        return product.options
-            .filter((po) => po.option.group === group)
-            .map((po) => po.option);
+    const getOptionsByGroup = (group: string) => {
+        return allOptions.filter((opt) => opt.group_name === group);
     };
 
     // Handle pilih opsi
-    const handleSelectOption = (option: Option, isMultiple: boolean = false) => {
+    const handleSelectOption = (option: DbOption, isMultiple: boolean = false) => {
         setSelectedOptions((prev) => {
             if (isMultiple) {
                 // Untuk addon: toggle
@@ -76,7 +56,7 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
                 return [...prev, option];
             } else {
                 // Untuk size/ice/sugar: replace dalam grup yang sama
-                const filtered = prev.filter((o) => o.group !== option.group);
+                const filtered = prev.filter((o) => o.group_name !== option.group_name);
                 return [...filtered, option];
             }
         });
@@ -88,12 +68,43 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
     };
 
     // Hitung total harga
-    const optionsPrice = selectedOptions.reduce((sum, opt) => sum + opt.extraPrice, 0);
+    const optionsPrice = selectedOptions.reduce((sum, opt) => sum + opt.extra_price, 0);
     const totalPrice = (product.price + optionsPrice) * quantity;
 
     // Handle tambah ke keranjang
     const handleAddToCart = () => {
-        addItem(product, quantity, selectedOptions, notes || undefined);
+        // Convert DbOption to global types OptionType for cart store compatibility
+        const cartSelectedOptions: OptionType[] = selectedOptions.map(opt => ({
+            id: opt.id,
+            group: opt.group_name as OptionGroup,
+            name: opt.name,
+            extraPrice: opt.extra_price
+        }));
+
+        // Convert product data for cart store
+        const cartProduct = {
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            description: product.description || "",
+            price: product.price,
+            image: product.image_url || "",
+            categoryId: product.category_id || "",
+            isAvailable: product.is_available,
+            options: product.product_options.map(po => ({
+                productId: product.id,
+                optionId: po.options.id,
+                option: {
+                    id: po.options.id,
+                    group: po.options.group_name as OptionGroup,
+                    name: po.options.name,
+                    extraPrice: po.options.extra_price
+                }
+            }))
+        };
+
+        addItem(cartProduct, quantity, cartSelectedOptions, notes || undefined);
+
         toast.success(`${product.name} ditambahkan ke keranjang`, {
             description: `${quantity}x - ${formatPrice(totalPrice)}`,
             action: {
@@ -117,15 +128,23 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
 
                 <div className="grid gap-8 lg:grid-cols-2">
                     {/* Product Image */}
-                    <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                        <Coffee className="h-32 w-32 text-primary/30" />
+                    <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center overflow-hidden relative">
+                        {product.image_url ? (
+                            <img
+                                src={product.image_url}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <Coffee className="h-32 w-32 text-primary/30" />
+                        )}
                     </div>
 
                     {/* Product Info & Customization */}
                     <div>
                         {/* Basic Info */}
                         <div className="mb-6">
-                            {!product.isAvailable && (
+                            {!product.is_available && (
                                 <Badge variant="destructive" className="mb-2">
                                     Tidak Tersedia
                                 </Badge>
@@ -145,13 +164,16 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
                         {availableGroups.length > 0 && (
                             <div className="space-y-6">
                                 {availableGroups.map((group) => {
-                                    const groupOptions = getProductOptionsByGroup(group);
+                                    const groupOptions = getOptionsByGroup(group);
+                                    // Sort options by extra_price (asc)
+                                    groupOptions.sort((a, b) => a.extra_price - b.extra_price);
+
                                     const isMultiple = group === "addon";
 
                                     return (
                                         <div key={group} className="border-t border-border pt-6">
                                             <h3 className="font-heading font-semibold mb-3">
-                                                {groupLabels[group]}
+                                                {groupLabels[group] || group}
                                                 {!isMultiple && (
                                                     <span className="text-sm font-normal text-muted-foreground ml-2">
                                                         (Pilih satu)
@@ -171,9 +193,9 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
                                                         >
                                                             {isSelected && <Check className="h-3 w-3" />}
                                                             {option.name}
-                                                            {option.extraPrice > 0 && (
+                                                            {option.extra_price > 0 && (
                                                                 <span className="text-xs opacity-70">
-                                                                    +{formatPrice(option.extraPrice)}
+                                                                    +{formatPrice(option.extra_price)}
                                                                 </span>
                                                             )}
                                                         </Button>
@@ -233,7 +255,7 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
                                 size="lg"
                                 className="w-full gap-2"
                                 onClick={handleAddToCart}
-                                disabled={!product.isAvailable}
+                                disabled={!product.is_available}
                             >
                                 <ShoppingBag className="h-5 w-5" />
                                 Tambah ke Keranjang - {formatPrice(totalPrice)}
