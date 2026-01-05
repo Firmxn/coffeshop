@@ -20,7 +20,7 @@ import { usePathname } from "next/navigation";
 const navLinks = [
     { label: "Beranda", href: "/", icon: Home },
     { label: "Menu", href: "/menu", icon: UtensilsCrossed },
-    { label: "Tentang", href: "/tentang", icon: Info },
+    { label: "Tentang", href: "/about", icon: Info },
 ];
 
 export default function Header({ storeName = "ARCoffee" }: { storeName?: string }) {

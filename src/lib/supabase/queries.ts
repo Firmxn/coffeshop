@@ -378,6 +378,7 @@ export async function getSettings() {
             facebook_url: "https://facebook.com/arcoffee",
             twitter_url: "https://twitter.com/arcoffee",
             google_maps_url: null,
+            google_maps_embed_url: null,
             whatsapp_number: null,
             about_hero: "ARCoffee adalah coffeeshop lokal yang lahir dari kecintaan mendalam terhadap kopi Indonesia. Kami percaya bahwa setiap cangkir kopi memiliki cerita, dan kami hadir untuk membuat momen ngopi Anda menjadi lebih bermakna.",
             about_story: "Berawal dari sebuah mimpi kecil, ARCoffee didirikan oleh sekelompok pecinta kopi yang ingin menghadirkan pengalaman ngopi yang berbeda di tengah hiruk-pikuk kota.\n\nKami bekerja sama langsung dengan petani kopi dari berbagai daerah di Indonesia - dari Aceh, Toraja, hingga Papua - untuk memastikan setiap biji yang kami sajikan memiliki kualitas terbaik dan mendukung kesejahteraan petani lokal.\n\nDengan barista yang terlatih dan menu yang dapat dikustomisasi sesuai selera, kami berkomitmen untuk memberikan pengalaman yang personal dan memorable di setiap kunjungan Anda.",

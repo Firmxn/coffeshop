@@ -27,6 +27,7 @@ const settingsSchema = z.object({
     facebook_url: z.string().url("URL Facebook tidak valid").optional().or(z.literal("")),
     twitter_url: z.string().url("URL Twitter tidak valid").optional().or(z.literal("")),
     google_maps_url: z.string().url("URL Google Maps tidak valid").optional().or(z.literal("")),
+    google_maps_embed_url: z.string().optional(),
     whatsapp_number: z.string().optional(),
     about_hero: z.string().optional(),
     about_story: z.string().optional(),
@@ -60,6 +61,7 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
             facebook_url: initialData.facebook_url || "",
             twitter_url: initialData.twitter_url || "",
             google_maps_url: initialData.google_maps_url || "",
+            google_maps_embed_url: initialData.google_maps_embed_url || "",
             whatsapp_number: initialData.whatsapp_number || "",
             about_hero: initialData.about_hero || "",
             about_story: initialData.about_story || "",
@@ -70,7 +72,16 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
         setIsSubmitting(true);
 
         try {
-            const result = await updateSettings(data);
+            // Extract src from iframe code if user pasted full code
+            let processedData = { ...data };
+            if (processedData.google_maps_embed_url && processedData.google_maps_embed_url.includes("<iframe")) {
+                const match = processedData.google_maps_embed_url.match(/src="([^"]+)"/);
+                if (match && match[1]) {
+                    processedData.google_maps_embed_url = match[1];
+                }
+            }
+
+            const result = await updateSettings(processedData);
 
             if (result.success) {
                 toast({
@@ -278,6 +289,26 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
                         {errors.google_maps_url && (
                             <p className="text-sm text-destructive">{errors.google_maps_url.message}</p>
                         )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="google_maps_embed_url" className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            Google Maps Embed Code (Untuk Peta Website)
+                        </Label>
+                        <Textarea
+                            id="google_maps_embed_url"
+                            {...register("google_maps_embed_url")}
+                            placeholder='Paste kode iframe di sini: <iframe src="https://www.google.com/maps/embed?..." ...></iframe>'
+                            rows={3}
+                            className="font-mono text-xs break-all"
+                        />
+                        {errors.google_maps_embed_url && (
+                            <p className="text-sm text-destructive">{errors.google_maps_embed_url.message}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                            Cara dapat: Buka Google Maps {'>'} Share {'>'} Embed a map {'>'} Copy HTML. Paste semuanya di sini.
+                        </p>
                     </div>
                 </CardContent>
             </Card>

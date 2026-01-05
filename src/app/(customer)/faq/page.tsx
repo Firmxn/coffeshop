@@ -155,7 +155,7 @@ export default async function FAQPage() {
                             Tim kami siap membantu Anda. Jangan ragu untuk menghubungi kami!
                         </p>
                         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link href="/kontak">
+                            <Link href="/contact">
                                 <Button size="lg" className="w-full sm:w-auto">
                                     Hubungi Kami
                                 </Button>

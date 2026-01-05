@@ -10,14 +10,14 @@ const footerLinks = {
         { label: "Makanan", href: "/menu?category=makanan" },
     ],
     company: [
-        { label: "Tentang Kami", href: "/tentang" },
-        { label: "Lokasi", href: "/lokasi" },
-        { label: "Karir", href: "/karir" },
+        { label: "Tentang Kami", href: "/about" },
+        { label: "Lokasi", href: "/locations" },
+        { label: "Karir", href: "/careers" },
     ],
     support: [
         { label: "FAQ", href: "/faq" },
-        { label: "Kontak", href: "/kontak" },
-        { label: "Kebijakan Privasi", href: "/privasi" },
+        { label: "Kontak", href: "/contact" },
+        { label: "Kebijakan Privasi", href: "/privacy" },
     ],
 };
 

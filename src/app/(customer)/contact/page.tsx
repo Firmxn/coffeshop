@@ -42,7 +42,7 @@ export default async function ContactPage() {
             title: "Lokasi",
             details: [settings.address, `${settings.city}, ${settings.postal_code}`],
             action: "Lihat di Maps",
-            href: settings.google_maps_url || "#",
+            href: settings.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.address)}`,
             target: "_blank",
         },
         {

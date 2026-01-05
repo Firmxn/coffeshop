@@ -17,6 +17,7 @@ export interface SettingsFormData {
     facebook_url: string;
     twitter_url: string;
     google_maps_url?: string;
+    google_maps_embed_url?: string;
     whatsapp_number?: string;
     about_hero?: string;
     about_story?: string;
@@ -41,9 +42,9 @@ export async function updateSettings(data: SettingsFormData) {
 
         // Revalidate all pages that use settings
         revalidatePath("/", "layout");
-        revalidatePath("/tentang");
-        revalidatePath("/kontak");
-        revalidatePath("/lokasi");
+        revalidatePath("/about");
+        revalidatePath("/contact");
+        revalidatePath("/locations");
         revalidatePath("/admin/settings");
 
         return { success: true };

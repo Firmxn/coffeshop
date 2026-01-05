@@ -150,7 +150,19 @@ export default async function LokasiPage() {
                     </h2>
                     <div className="mx-auto max-w-4xl rounded-lg border bg-card overflow-hidden">
                         <div className="aspect-video bg-muted flex items-center justify-center relative">
-                            {settings.google_maps_url || settings.address ? (
+                            {settings.google_maps_embed_url ? (
+                                <iframe
+                                    src={settings.google_maps_embed_url}
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                    title="Lokasi Toko"
+                                    className="absolute inset-0"
+                                />
+                            ) : settings.google_maps_url || settings.address ? (
                                 <iframe
                                     src={`https://maps.google.com/maps?q=${encodeURIComponent(`${settings.address}, ${settings.city}`)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
                                     width="100%"
@@ -186,7 +198,7 @@ export default async function LokasiPage() {
                             Kami terus berkembang! Segera hadir di kota Anda.
                         </p>
                         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link href="/kontak">
+                            <Link href="/contact">
                                 <Button size="lg" className="w-full sm:w-auto">
                                     Hubungi Kami
                                 </Button>

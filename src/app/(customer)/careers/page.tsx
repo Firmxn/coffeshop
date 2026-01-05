@@ -164,7 +164,7 @@ export default async function KarirPage() {
                                         </div>
                                     </div>
                                     <Button asChild>
-                                        <Link href="/kontak">Lamar Sekarang</Link>
+                                        <Link href="/contact">Lamar Sekarang</Link>
                                     </Button>
                                 </div>
 
@@ -201,7 +201,7 @@ export default async function KarirPage() {
                             Kirimkan CV dan portfolio Anda. Kami selalu mencari talenta terbaik!
                         </p>
                         <div className="mt-8">
-                            <Link href="/kontak">
+                            <Link href="/contact">
                                 <Button size="lg">
                                     Kirim Lamaran Umum
                                 </Button>
