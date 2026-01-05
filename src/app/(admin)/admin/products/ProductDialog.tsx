@@ -29,9 +29,8 @@ import { toast } from "sonner";
 import {
     createProduct,
     updateProduct,
-    productSchema,
-    ProductFormData,
 } from "@/actions/product-actions";
+import { productSchema, ProductFormData } from "@/lib/schemas";
 import { Category } from "@/types";
 
 interface ProductDialogProps {

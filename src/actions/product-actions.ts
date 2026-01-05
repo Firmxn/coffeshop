@@ -3,18 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { productSchema, ProductFormData } from "@/lib/schemas";
 
-// Schema Validation
-export const productSchema = z.object({
-    name: z.string().min(3, "Nama produk minimal 3 karakter"),
-    description: z.string().optional(),
-    price: z.coerce.number().min(0, "Harga tidak boleh negatif"),
-    category_id: z.string().uuid("Kategori tidak valid"),
-    image: z.string().url("URL gambar tidak valid").optional().or(z.literal("")),
-    is_available: z.boolean().default(true),
-});
-
-export type ProductFormData = z.infer<typeof productSchema>;
 
 // Create Product
 export async function createProduct(data: ProductFormData) {
