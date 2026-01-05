@@ -11,3 +11,12 @@ export const productSchema = z.object({
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;
+
+// Schema Validation untuk Opsi/Add-on
+export const optionSchema = z.object({
+    group_name: z.enum(["size", "ice", "sugar", "addon"]),
+    name: z.string().min(1, "Nama opsi wajib diisi"),
+    extra_price: z.coerce.number().min(0, "Harga tambahan tidak boleh negatif"),
+});
+
+export type OptionFormData = z.infer<typeof optionSchema>;

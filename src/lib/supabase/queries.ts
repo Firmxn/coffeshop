@@ -284,3 +284,25 @@ export async function updateOrderStatus(
 
     return true;
 }
+
+// ========================
+// OPTIONS (ADD-ONS)
+// ========================
+
+// Ambil semua opsi (untuk admin management & helper)
+export async function getOptions() {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from("options")
+        .select("*")
+        .order("group_name", { ascending: true })
+        .order("extra_price", { ascending: true });
+
+    if (error) {
+        console.error("Error fetching options:", error);
+        return [];
+    }
+
+    return data || [];
+}

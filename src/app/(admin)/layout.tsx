@@ -10,7 +10,8 @@ import {
     Settings,
     LogOut,
     Menu,
-    X
+    X,
+    Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -20,6 +21,7 @@ const sidebarLinks = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Pesanan", href: "/admin/orders", icon: ShoppingBag },
     { label: "Produk", href: "/admin/products", icon: Package },
+    { label: "Opsi & Adds-on", href: "/admin/options", icon: Layers },
     { label: "Pengaturan", href: "/admin/settings", icon: Settings },
 ];
 
@@ -77,8 +79,8 @@ export default function AdminLayout({
                                     href={link.href}
                                     onClick={() => setIsSidebarOpen(false)}
                                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive
-                                            ? "bg-primary text-primary-foreground"
-                                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        ? "bg-primary text-primary-foreground"
+                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                         }`}
                                 >
                                     <link.icon className="h-5 w-5" />
