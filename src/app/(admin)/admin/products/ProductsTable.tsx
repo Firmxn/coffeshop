@@ -1,16 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import {
-    Package,
-    Search,
-    Edit,
-    Trash2,
-    Coffee,
-    Plus,
-    Loader2,
-} from "lucide-react";
+import { Edit, Trash2, Plus, Coffee, Search, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatPrice } from "@/lib/utils";
@@ -18,28 +11,31 @@ import { deleteProduct } from "@/actions/product-actions";
 import { ProductDialog } from "./ProductDialog";
 import { toast } from "sonner";
 import { Category } from "@/types";
+import { Option as DbOption } from "@/lib/supabase/types";
 
 // Type definition for product data from DB
 export interface AdminProduct {
     id: string;
     name: string;
-    description: string | null;
+    description: string;
     price: number;
     category_id: string;
     image: string | null;
     is_available: boolean;
     categories: { name: string } | null; // Joined relation
     slug: string;
+    option_ids?: string[];
 }
 
 interface ProductsTableProps {
     products: AdminProduct[];
     categories: Category[];
+    options?: DbOption[];
 }
 
-export default function ProductsTable({ products, categories }: ProductsTableProps) {
+export default function ProductsTable({ products, categories, options }: ProductsTableProps) {
     const [searchQuery, setSearchQuery] = useState("");
-    const [categoryFilter, setCategoryFilter] = useState<string | "all">("all");
+    const [selectedCategory, setSelectedCategory] = useState<string>("all");
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
     // Filter logic
@@ -48,7 +44,7 @@ export default function ProductsTable({ products, categories }: ProductsTablePro
             .toLowerCase()
             .includes(searchQuery.toLowerCase());
         const matchesCategory =
-            categoryFilter === "all" || product.category_id === categoryFilter;
+            selectedCategory === "all" || product.category_id === selectedCategory;
         return matchesSearch && matchesCategory;
     });
 
@@ -75,30 +71,30 @@ export default function ProductsTable({ products, categories }: ProductsTablePro
                     {/* Search */}
                     <div className="relative flex-1 max-w-sm">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <input
+                        <Input
                             type="text"
                             placeholder="Cari produk..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full rounded-lg border border-input bg-background pl-10 pr-4 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            className="pl-10 pr-4"
                         />
                     </div>
 
                     {/* Category Query */}
                     <div className="flex flex-wrap gap-2">
                         <Button
-                            variant={categoryFilter === "all" ? "default" : "outline"}
+                            variant={selectedCategory === "all" ? "default" : "outline"}
                             size="sm"
-                            onClick={() => setCategoryFilter("all")}
+                            onClick={() => setSelectedCategory("all")}
                         >
                             Semua
                         </Button>
                         {categories.map((cat) => (
                             <Button
                                 key={cat.id}
-                                variant={categoryFilter === cat.id ? "default" : "outline"}
+                                variant={selectedCategory === cat.id ? "default" : "outline"}
                                 size="sm"
-                                onClick={() => setCategoryFilter(cat.id)}
+                                onClick={() => setSelectedCategory(cat.id)}
                             >
                                 {cat.name}
                             </Button>
@@ -109,10 +105,10 @@ export default function ProductsTable({ products, categories }: ProductsTablePro
                 {/* Add Button */}
                 <ProductDialog
                     categories={categories}
+                    options={options}
                     trigger={
-                        <Button className="gap-2">
-                            <Plus className="h-4 w-4" />
-                            Tambah Produk
+                        <Button className="w-full sm:w-auto gap-2">
+                            <Plus className="h-4 w-4" /> Product
                         </Button>
                     }
                 />
@@ -170,6 +166,7 @@ export default function ProductsTable({ products, categories }: ProductsTablePro
                                     {/* Edit Button */}
                                     <ProductDialog
                                         categories={categories}
+                                        options={options}
                                         productToEdit={product}
                                         trigger={
                                             <Button variant="secondary" size="icon" className="h-8 w-8">
@@ -198,21 +195,6 @@ export default function ProductsTable({ products, categories }: ProductsTablePro
                     </Card>
                 ))}
             </div>
-
-            {/* Empty State */}
-            {
-                filteredProducts.length === 0 && (
-                    <div className="text-center py-12">
-                        <Package className="mx-auto h-12 w-12 text-muted-foreground/30" />
-                        <h3 className="mt-4 font-heading text-lg font-semibold">
-                            Belum ada produk
-                        </h3>
-                        <p className="text-muted-foreground">
-                            Mulai tambahkan produk untuk menu Anda.
-                        </p>
-                    </div>
-                )
-            }
-        </div >
+        </div>
     );
 }

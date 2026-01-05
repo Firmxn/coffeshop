@@ -33,17 +33,21 @@ import {
 } from "@/actions/product-actions";
 import { productSchema, ProductFormData } from "@/lib/schemas";
 import { Category } from "@/types";
+import { Option as DbOption } from "@/lib/supabase/types";
+import { formatPrice } from "@/lib/utils";
 
 interface ProductDialogProps {
     categories: Category[];
+    options?: DbOption[]; // Available master options
     productToEdit?: {
         id: string;
         name: string;
         description?: string | null;
         price: number;
-        category_id: string; // use DB naming or mapped? Lets assume mapped prop passed is DB-like or handled
+        category_id: string;
         image?: string | null;
         is_available: boolean;
+        option_ids?: string[];
     };
     trigger?: React.ReactNode;
     open?: boolean;
@@ -51,8 +55,16 @@ interface ProductDialogProps {
     onSuccess?: () => void;
 }
 
+const GROUP_LABELS: Record<string, string> = {
+    size: "Ukuran (Size)",
+    ice: "Es (Ice)",
+    sugar: "Gula (Sugar)",
+    addon: "Topping / Add-on",
+};
+
 export function ProductDialog({
     categories,
+    options,
     productToEdit,
     trigger,
     open: controlledOpen,
@@ -76,7 +88,7 @@ export function ProductDialog({
     const [filePreview, setFilePreview] = useState<string | null>(null);
 
     const form = useForm<ProductFormData>({
-        resolver: zodResolver(productSchema) as any, // Cast to any to handle coercion types
+        resolver: zodResolver(productSchema) as any,
         defaultValues: {
             name: productToEdit?.name || "",
             description: productToEdit?.description || "",
@@ -84,6 +96,7 @@ export function ProductDialog({
             category_id: productToEdit?.category_id || (categories[0]?.id || ""),
             image: productToEdit?.image || "",
             is_available: productToEdit ? productToEdit.is_available : true,
+            options: productToEdit?.option_ids || [],
         },
     });
 
@@ -136,16 +149,27 @@ export function ProductDialog({
         }
     };
 
+    // Group options for display
+    const groupedOptions = (options || []).reduce((acc, opt) => {
+        const group = opt.group_name;
+        if (!acc[group]) acc[group] = [];
+        acc[group].push(opt);
+        return acc;
+    }, {} as Record<string, DbOption[]>);
+
+    // Order groups: size, sugar, ice, addon
+    const groupOrder = ["size", "sugar", "ice", "addon"];
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
                         {productToEdit ? "Edit Produk" : "Tambah Produk Baru"}
                     </DialogTitle>
                     <DialogDescription>
-                        Isi detail produk di bawah ini. Klik simpan setelah selesai.
+                        Isi detail produk dan opsi yang tersedia.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -192,11 +216,6 @@ export function ProductDialog({
                                     ))}
                                 </SelectContent>
                             </Select>
-                            {form.formState.errors.category_id && (
-                                <p className="text-sm text-destructive">
-                                    {form.formState.errors.category_id.message}
-                                </p>
-                            )}
                         </div>
                     </div>
 
@@ -208,6 +227,54 @@ export function ProductDialog({
                             placeholder="Jelaskan rasa dan komposisi produk..."
                         />
                     </div>
+
+                    {/* Options Selection */}
+                    {options && options.length > 0 && (
+                        <div className="grid gap-2">
+                            <Label>Opsi & Add-ons Tersedia</Label>
+                            <div className="border rounded-md p-4 max-h-[250px] overflow-y-auto space-y-4 bg-muted/20">
+                                {groupOrder.map((groupKey) => {
+                                    const opts = groupedOptions[groupKey];
+                                    if (!opts || opts.length === 0) return null;
+
+                                    return (
+                                        <div key={groupKey}>
+                                            <h4 className="font-semibold text-xs uppercase text-muted-foreground mb-2 sticky top-0 bg-background/95 backdrop-blur py-1 z-10 w-full border-b">
+                                                {GROUP_LABELS[groupKey] || groupKey}
+                                            </h4>
+                                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                                {opts.map((opt) => (
+                                                    <div key={opt.id} className="flex items-center space-x-2">
+                                                        <Checkbox
+                                                            id={`opt-${opt.id}`}
+                                                            checked={form.watch("options")?.includes(opt.id)}
+                                                            onCheckedChange={(checked) => {
+                                                                const current = form.getValues("options") || [];
+                                                                if (checked) {
+                                                                    form.setValue("options", [...current, opt.id]);
+                                                                } else {
+                                                                    form.setValue("options", current.filter((id) => id !== opt.id));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <Label htmlFor={`opt-${opt.id}`} className="text-sm cursor-pointer font-normal flex justify-between w-full">
+                                                            <span>{opt.name}</span>
+                                                            {opt.extra_price > 0 && (
+                                                                <span className="text-muted-foreground text-xs ml-1">
+                                                                    +{formatPrice(opt.extra_price)}
+                                                                </span>
+                                                            )}
+                                                        </Label>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <p className="text-xs text-muted-foreground">Centang opsi yang bisa dipilih customer untuk produk ini.</p>
+                        </div>
+                    )}
 
                     <div className="grid gap-2">
                         <Label>Gambar Produk</Label>
@@ -235,8 +302,6 @@ export function ProductDialog({
                                     if (file) {
                                         setSelectedFile(file);
                                         setFilePreview(URL.createObjectURL(file));
-                                        // Optional: Clear manual URL input if file selected to avoid confusion? 
-                                        // Or keep it as fallback.
                                     }
                                 }}
                                 className="cursor-pointer"
@@ -275,7 +340,7 @@ export function ProductDialog({
                         </Button>
                         <Button type="submit" disabled={isSubmitting}>
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Save Changes
+                            Simpan Produk
                         </Button>
                     </DialogFooter>
                 </form>

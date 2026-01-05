@@ -65,7 +65,7 @@ export async function createProduct(data: ProductFormData) {
         const validatedData = productSchema.parse(data);
 
         // Insert ke DB
-        const { error } = await supabase.from("products").insert({
+        const { data: newProduct, error } = await supabase.from("products").insert({
             name: validatedData.name,
             description: validatedData.description,
             price: validatedData.price,
@@ -73,11 +73,26 @@ export async function createProduct(data: ProductFormData) {
             image_url: validatedData.image || null,
             is_available: validatedData.is_available,
             slug: validatedData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"), // Simple slug gen
-        });
+        }).select().single(); // Select to get ID
 
         if (error) {
             console.error("Create product DB error:", error);
             return { success: false, error: error.message };
+        }
+
+        // Insert Product Options
+        if (validatedData.options && validatedData.options.length > 0) {
+            const optionsPayload = validatedData.options.map((optId) => ({
+                product_id: newProduct.id,
+                option_id: optId,
+            }));
+
+            const { error: optError } = await supabase.from("product_options").insert(optionsPayload);
+            if (optError) {
+                console.error("Error adding product options:", optError);
+                // Non-fatal error? Should we rollback product?
+                // For simplicity, we just log it. RLS might block if not admin (but here we are admin).
+            }
         }
 
         revalidatePath("/admin/products");
@@ -119,6 +134,20 @@ export async function updateProduct(id: string, data: ProductFormData) {
         if (error) {
             console.error("Update product DB error:", error);
             return { success: false, error: error.message };
+        }
+
+        // Update Options: Delete all existing -> Insert new
+        const { error: deleteError } = await supabase.from("product_options").delete().eq("product_id", id);
+        if (deleteError) {
+            console.error("Error clearing old options:", deleteError);
+        } else if (validatedData.options && validatedData.options.length > 0) {
+            const optionsPayload = validatedData.options.map((optId) => ({
+                product_id: id,
+                option_id: optId,
+            }));
+
+            const { error: insertError } = await supabase.from("product_options").insert(optionsPayload);
+            if (insertError) console.error("Error inserting new options:", insertError);
         }
 
         revalidatePath("/admin/products");

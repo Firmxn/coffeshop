@@ -8,6 +8,7 @@ export const productSchema = z.object({
     category_id: z.string().uuid("Kategori tidak valid"),
     image: z.string().url("URL gambar tidak valid").optional().or(z.literal("")),
     is_available: z.boolean().default(true),
+    options: z.array(z.string()).optional(), // Array of Option IDs
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;
