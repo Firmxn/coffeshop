@@ -225,7 +225,7 @@ export default function OrdersTable({ initialOrders }: OrdersTableProps) {
                                         return (
                                             <TableRow key={order.id}>
                                                 <TableCell className="font-mono font-medium">
-                                                    {order.id}
+                                                    {order.orderNumber || order.id}
                                                 </TableCell>
                                                 <TableCell>
                                                     <div>
@@ -336,7 +336,7 @@ export default function OrdersTable({ initialOrders }: OrdersTableProps) {
                         <CardContent className="space-y-4">
                             <div>
                                 <p className="text-sm text-muted-foreground">Order ID</p>
-                                <p className="font-mono font-bold">{selectedOrder.id}</p>
+                                <p className="font-mono font-bold">{selectedOrder.orderNumber || selectedOrder.id}</p>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>

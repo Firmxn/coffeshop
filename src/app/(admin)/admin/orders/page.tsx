@@ -11,7 +11,8 @@ export default async function AdminOrdersPage() {
 
     // Mapping DB data ke App Types
     const mappedOrders: Order[] = ordersData.map((order) => ({
-        id: order.order_number,
+        id: order.id, // Use UUID for operations
+        orderNumber: order.order_number, // Display ID
         customerName: order.customer_name,
         customerPhone: order.customer_phone,
         totalPrice: order.total_price,

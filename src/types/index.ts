@@ -53,6 +53,7 @@ export interface CartItem {
 // Order/Pesanan
 export interface Order {
     id: string;
+    orderNumber?: string; // Human readable ID (ARC-XXX)
     items: CartItem[];
     totalPrice: number;
     status: OrderStatus;
