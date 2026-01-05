@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Coffee, Star, Truck, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getCategories, getProducts } from "@/lib/supabase/queries";
+import { getCategories, getProducts, getSettings } from "@/lib/supabase/queries";
 import { formatPrice } from "@/lib/utils";
 
 // Revalidasi setiap jam
@@ -36,10 +36,12 @@ export default async function HomePage() {
     // Fetch data
     const categoriesPromise = getCategories();
     const productsPromise = getProducts();
+    const settingsPromise = getSettings();
 
-    const [categories, products] = await Promise.all([
+    const [categories, products, settings] = await Promise.all([
         categoriesPromise,
         productsPromise,
+        settingsPromise,
     ]);
 
     // Featured products (ambil 4 produk pertama)
@@ -48,19 +50,25 @@ export default async function HomePage() {
     return (
         <>
             {/* Hero Section */}
-            <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5">
+            <section className="relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-accent/5">
                 <div className="container mx-auto px-4 py-20 md:py-28">
                     <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
                         {/* Hero Content */}
                         <div className="max-w-xl">
                             <h1 className="font-heading text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-                                Kopi Premium,{" "}
-                                <br className="sm:hidden" />
-                                <span className="text-gradient-coffee">Sesuai Seleramu</span>
+                                {settings.store_tagline.split('|')[0].trim()}
+                                {settings.store_tagline.includes('|') && (
+                                    <>
+                                        {", "}
+                                        <br className="sm:hidden" />
+                                        <span className="text-gradient-coffee">
+                                            {settings.store_tagline.split('|')[1].trim()}
+                                        </span>
+                                    </>
+                                )}
                             </h1>
                             <p className="mt-6 text-base sm:text-lg text-muted-foreground">
-                                Nikmati pengalaman kopi yang berbeda. Pilih menu favorit,
-                                kustomisasi sesuai selera, dan rasakan kesempurnaan di setiap tegukan.
+                                {settings.store_description}
                             </p>
                             <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
                                 <Link href="/menu" className="w-full sm:w-auto">
@@ -138,7 +146,7 @@ export default async function HomePage() {
                             <Link
                                 key={category.id}
                                 href={`/menu?category=${category.slug}`}
-                                className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 p-8 transition-all hover:shadow-lg hover:scale-[1.02]"
+                                className="group relative overflow-hidden rounded-2xl bg-linear-to-br from-primary/10 to-accent/10 p-8 transition-all hover:shadow-lg hover:scale-[1.02]"
                             >
                                 <div className="relative z-10">
                                     <h3 className="font-heading text-2xl font-bold">
@@ -188,7 +196,7 @@ export default async function HomePage() {
                                 className="group rounded-2xl bg-card p-4 shadow-sm transition-all hover:shadow-md"
                             >
                                 {/* Product Image Placeholder */}
-                                <div className="aspect-square rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center overflow-hidden relative">
+                                <div className="aspect-square rounded-xl bg-linear-to-br from-primary/10 to-accent/10 flex items-center justify-center overflow-hidden relative">
                                     {product.image_url ? (
                                         <img
                                             src={product.image_url}

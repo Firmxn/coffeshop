@@ -2,44 +2,55 @@ import { Metadata } from "next";
 import { MapPin, Clock, Phone, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { getSettings } from "@/lib/supabase/queries";
 
-export const metadata: Metadata = {
-    title: "Lokasi Toko | ARCoffee",
-    description: "Temukan lokasi cabang ARCoffee terdekat dari Anda. Kunjungi kami untuk pengalaman kopi terbaik.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getSettings();
+    const cleanStoreName = settings.store_name.replace(/\|/g, "");
 
-const locations = [
-    {
-        name: "ARCoffee Jakarta Selatan",
-        address: "Jl. Kopi Nikmat No. 123, Kebayoran Baru",
-        city: "Jakarta Selatan, DKI Jakarta 12345",
-        phone: "+62 812-3456-7890",
-        hours: "08.00 - 22.00 WIB",
-        isMain: true,
-    },
-    {
-        name: "ARCoffee Bandung",
-        address: "Jl. Braga No. 45, Sumur Bandung",
-        city: "Bandung, Jawa Barat 40111",
-        phone: "+62 821-9876-5432",
-        hours: "08.00 - 22.00 WIB",
-        isMain: false,
-    },
-    {
-        name: "ARCoffee Surabaya",
-        address: "Jl. Tunjungan No. 88, Genteng",
-        city: "Surabaya, Jawa Timur 60275",
-        phone: "+62 813-2468-1357",
-        hours: "08.00 - 22.00 WIB",
-        isMain: false,
-    },
-];
+    return {
+        title: "Lokasi Toko",
+        description: `Temukan lokasi cabang ${cleanStoreName} terdekat dari Anda. Kunjungi kami untuk pengalaman kopi terbaik.`,
+    };
+}
 
-export default function LokasiPage() {
+export default async function LokasiPage() {
+    const settings = await getSettings();
+    const cleanStoreName = settings.store_name.replace(/\|/g, "");
+
+    const locations = [
+        {
+            name: `${cleanStoreName} (Pusat)`,
+            address: settings.address,
+            city: `${settings.city}, ${settings.postal_code}`,
+            phone: settings.phone,
+            hours: settings.operating_hours_text,
+            mapUrl: settings.google_maps_url,
+            isMain: true,
+        },
+        // Placeholder branches
+        {
+            name: `${cleanStoreName} Bandung`,
+            address: "Jl. Braga No. 45, Sumur Bandung",
+            city: "Bandung, Jawa Barat 40111",
+            phone: "+62 821-9876-5432",
+            hours: "08.00 - 22.00 WIB",
+            isMain: false,
+        },
+        {
+            name: `${cleanStoreName} Surabaya`,
+            address: "Jl. Tunjungan No. 88, Genteng",
+            city: "Surabaya, Jawa Timur 60275",
+            phone: "+62 813-2468-1357",
+            hours: "08.00 - 22.00 WIB",
+            isMain: false,
+        },
+    ];
+
     return (
-        <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+        <div className="min-h-screen bg-linear-to-b from-background to-muted/30">
             {/* Hero Section */}
-            <section className="border-b border-border bg-gradient-to-br from-primary/5 via-background to-accent/5">
+            <section className="border-b border-border bg-linear-to-br from-primary/5 via-background to-accent/5">
                 <div className="container mx-auto px-4 py-16 md:py-24">
                     <div className="mx-auto max-w-3xl text-center">
                         <div className="mb-6 flex justify-center">
@@ -51,7 +62,7 @@ export default function LokasiPage() {
                             Lokasi <span className="text-primary">Kami</span>
                         </h1>
                         <p className="mt-6 text-lg text-muted-foreground">
-                            Kunjungi cabang ARCoffee terdekat dan nikmati pengalaman kopi premium
+                            Kunjungi cabang {cleanStoreName} terdekat dan nikmati pengalaman kopi premium
                         </p>
                     </div>
                 </div>
@@ -102,7 +113,7 @@ export default function LokasiPage() {
                                     <div className="flex gap-2">
                                         <Clock className="h-4 w-4 shrink-0 mt-0.5" />
                                         <div>
-                                            <p className="font-medium text-foreground">Setiap Hari</p>
+                                            <p className="font-medium text-foreground">Jam Operasional</p>
                                             <p>{location.hours}</p>
                                         </div>
                                     </div>
@@ -111,7 +122,7 @@ export default function LokasiPage() {
                                 <div className="mt-6 flex gap-2">
                                     <Button variant="outline" size="sm" className="flex-1 gap-2" asChild>
                                         <a
-                                            href={`https://maps.google.com/?q=${encodeURIComponent(location.address + ", " + location.city)}`}
+                                            href={location.mapUrl || `https://maps.google.com/?q=${encodeURIComponent(location.address + ", " + location.city)}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >

@@ -1,12 +1,16 @@
 import { Metadata } from "next";
 import { Shield } from "lucide-react";
+import { getSettings } from "@/lib/supabase/queries";
 
 export const metadata: Metadata = {
-    title: "Kebijakan Privasi | ARCoffee",
-    description: "Kebijakan privasi ARCoffee mengenai pengumpulan, penggunaan, dan perlindungan data pribadi Anda.",
+    title: "Kebijakan Privasi",
+    description: "Kebijakan privasi mengenai pengumpulan, penggunaan, dan perlindungan data pribadi Anda.",
 };
 
-export default function PrivasiPage() {
+export default async function PrivasiPage() {
+    const settings = await getSettings();
+    const cleanStoreName = settings.store_name.replace(/\|/g, "");
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
             {/* Hero Section */}
@@ -38,7 +42,7 @@ export default function PrivasiPage() {
                                     1. Pendahuluan
                                 </h2>
                                 <p>
-                                    ARCoffee ("kami", "kita", atau "milik kami") berkomitmen untuk melindungi
+                                    {cleanStoreName} ("kami", "kita", atau "milik kami") berkomitmen untuk melindungi
                                     privasi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan,
                                     menggunakan, dan melindungi informasi pribadi Anda saat Anda menggunakan
                                     layanan kami.
@@ -146,10 +150,10 @@ export default function PrivasiPage() {
                                     menggunakan hak Anda terkait data pribadi, silakan hubungi kami di:
                                 </p>
                                 <div className="mt-4 rounded-lg border bg-card p-4">
-                                    <p className="font-semibold text-foreground">ARCoffee</p>
-                                    <p>Email: privacy@arcoffee.com</p>
-                                    <p>Telepon: +62 812-3456-7890</p>
-                                    <p>Alamat: Jl. Kopi Nikmat No. 123, Jakarta Selatan 12345</p>
+                                    <p className="font-semibold text-foreground">{cleanStoreName}</p>
+                                    <p>Email: {settings.email}</p>
+                                    <p>Telepon: {settings.phone}</p>
+                                    <p>Alamat: {settings.address}, {settings.city}</p>
                                 </div>
                             </div>
                         </div>

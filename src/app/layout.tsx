@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { getSettings } from "@/lib/supabase/queries";
 import "./globals.css";
 
 // Font untuk body text - clean dan readable
@@ -18,20 +19,26 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "ARCoffee - Premium Coffee Experience",
-    template: "%s | ARCoffee",
-  },
-  description: "Nikmati pengalaman kopi premium dengan kustomisasi sesuai selera Anda. Pesan online, ambil di tempat.",
-  keywords: ["coffee", "kopi", "coffeeshop", "ARCoffee", "premium coffee"],
-  authors: [{ name: "ARCoffee" }],
-  openGraph: {
-    type: "website",
-    locale: "id_ID",
-    siteName: "ARCoffee",
-  },
-};
+// Gunakan generateMetadata untuk data dinamis
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  const cleanStoreName = settings.store_name.replace(/\|/g, "");
+
+  return {
+    title: {
+      default: `${cleanStoreName} - Premium Coffee Experience`,
+      template: `%s | ${cleanStoreName}`,
+    },
+    description: settings.store_description || "Nikmati pengalaman kopi premium dengan kustomisasi sesuai selera Anda. Pesan online, ambil di tempat.",
+    keywords: ["coffee", "kopi", "coffeeshop", cleanStoreName, "premium coffee"],
+    authors: [{ name: cleanStoreName }],
+    openGraph: {
+      type: "website",
+      locale: "id_ID",
+      siteName: cleanStoreName,
+    },
+  };
+}
 
 export default function RootLayout({
   children,

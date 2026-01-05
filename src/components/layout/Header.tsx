@@ -23,19 +23,20 @@ const navLinks = [
     { label: "Tentang", href: "/tentang", icon: Info },
 ];
 
-export default function Header() {
+export default function Header({ storeName = "ARCoffee" }: { storeName?: string }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const totalItems = useCartStore((state) => state.getTotalItems());
     const pathname = usePathname();
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
                     <Coffee className="h-7 w-7 text-primary" />
                     <span className="font-heading text-xl font-bold tracking-tight text-foreground">
-                        ARC<span className="text-primary">offee</span>
+                        {storeName.split('|')[0]}
+                        <span className="text-primary">{storeName.split('|')[1] || ""}</span>
                     </span>
                 </Link>
 
@@ -95,7 +96,10 @@ export default function Header() {
                                 <SheetHeader className="border-b border-border px-6 py-4">
                                     <SheetTitle className="flex items-center gap-2">
                                         <Coffee className="h-6 w-6 text-primary" />
-                                        <span className="font-heading text-foreground">ARC<span className="text-primary">offee</span></span>
+                                        <span className="font-heading text-lg font-bold text-foreground">
+                                            {storeName.split('|')[0]}
+                                            <span className="text-primary">{storeName.split('|')[1] || ""}</span>
+                                        </span>
                                     </SheetTitle>
                                 </SheetHeader>
 

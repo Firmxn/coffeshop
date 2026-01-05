@@ -26,6 +26,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Toaster } from "@/components/ui/toaster";
 
 const sidebarLinks = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -38,9 +39,10 @@ const sidebarLinks = [
 interface AdminShellProps {
     children: React.ReactNode;
     userEmail: string;
+    storeName?: string;
 }
 
-export default function AdminShell({ children, userEmail }: AdminShellProps) {
+export default function AdminShell({ children, userEmail, storeName = "ARCoffee" }: AdminShellProps) {
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -58,6 +60,8 @@ export default function AdminShell({ children, userEmail }: AdminShellProps) {
                 />
             )}
 
+            <Toaster />
+
             {/* Sidebar */}
             <aside
                 className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -69,7 +73,8 @@ export default function AdminShell({ children, userEmail }: AdminShellProps) {
                         <Link href="/admin" className="flex items-center gap-2">
                             <Coffee className="h-7 w-7 text-primary" />
                             <span className="font-heading text-lg font-bold text-foreground">
-                                ARC<span className="text-primary">offee</span>
+                                {storeName.split('|')[0]}
+                                <span className="text-primary">{storeName.split('|')[1] || ""}</span>
                             </span>
                         </Link>
                         <Button
@@ -174,6 +179,7 @@ export default function AdminShell({ children, userEmail }: AdminShellProps) {
                     {children}
                 </main>
             </div>
+            <Toaster />
         </div>
     );
 }

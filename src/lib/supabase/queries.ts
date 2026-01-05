@@ -1,5 +1,39 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Category, ProductWithOptions, OrderWithItems } from "@/lib/supabase/types";
+
+// Definisi tipe data secara lokal karena file types.ts bermasalah (bukan sebuah modul)
+export interface Category {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    image_url?: string;
+    created_at: string;
+}
+
+export interface ProductWithOptions {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    price: number;
+    image_url?: string;
+    category_id: string;
+    created_at: string;
+    options: any[];
+}
+
+export interface OrderWithItems {
+    id: string;
+    order_number: string;
+    customer_name: string;
+    customer_phone?: string;
+    notes?: string;
+    created_at: string;
+    status: string;
+    total_price: number;
+    user_id: string;
+    order_items: any[];
+}
 
 // ========================
 // CATEGORIES
@@ -305,4 +339,47 @@ export async function getOptions() {
     }
 
     return data || [];
+}
+
+// ========================
+// SETTINGS
+// ========================
+
+// Ambil settings toko (hanya ada 1 row)
+export async function getSettings() {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from("settings")
+        .select("*")
+        .single(); // Hanya ada 1 row settings
+
+    if (error) {
+        console.error("Error fetching settings:", error);
+        // Return default values if error
+        return {
+            id: "00000000-0000-0000-0000-000000000001",
+            store_name: "ARCoffee",
+            store_tagline: "Kopi Premium, Sesuai Seleramu",
+            store_description: "Nikmati pengalaman kopi premium dengan kustomisasi sesuai selera Anda.",
+            phone: "+62 812-3456-7890",
+            email: "hello@arcoffee.com",
+            address: "Jl. Kopi Nikmat No. 123",
+            city: "Jakarta Selatan",
+            postal_code: "12345",
+            operating_hours: {},
+            operating_hours_text: "Setiap hari, 08:00 - 22:00 WIB",
+            instagram_url: "https://instagram.com/arcoffee",
+            facebook_url: "https://facebook.com/arcoffee",
+            twitter_url: "https://twitter.com/arcoffee",
+            google_maps_url: null,
+            whatsapp_number: null,
+            about_hero: "ARCoffee adalah coffeeshop lokal yang lahir dari kecintaan mendalam terhadap kopi Indonesia. Kami percaya bahwa setiap cangkir kopi memiliki cerita, dan kami hadir untuk membuat momen ngopi Anda menjadi lebih bermakna.",
+            about_story: "Berawal dari sebuah mimpi kecil, ARCoffee didirikan oleh sekelompok pecinta kopi yang ingin menghadirkan pengalaman ngopi yang berbeda di tengah hiruk-pikuk kota.\n\nKami bekerja sama langsung dengan petani kopi dari berbagai daerah di Indonesia - dari Aceh, Toraja, hingga Papua - untuk memastikan setiap biji yang kami sajikan memiliki kualitas terbaik dan mendukung kesejahteraan petani lokal.\n\nDengan barista yang terlatih dan menu yang dapat dikustomisasi sesuai selera, kami berkomitmen untuk memberikan pengalaman yang personal dan memorable di setiap kunjungan Anda.",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        };
+    }
+
+    return data;
 }

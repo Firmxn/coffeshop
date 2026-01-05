@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Coffee, Instagram, Facebook, Twitter } from "lucide-react";
+import { getSettings } from "@/lib/supabase/queries";
 
 // Link footer
 const footerLinks = {
@@ -20,15 +21,17 @@ const footerLinks = {
     ],
 };
 
-// Social media links
-const socialLinks = [
-    { icon: Instagram, href: "https://instagram.com/arcoffee", label: "Instagram" },
-    { icon: Facebook, href: "https://facebook.com/arcoffee", label: "Facebook" },
-    { icon: Twitter, href: "https://twitter.com/arcoffee", label: "Twitter" },
-];
-
-export default function Footer() {
+export default async function Footer() {
     const currentYear = new Date().getFullYear();
+    const settings = await getSettings();
+    const cleanStoreName = settings.store_name.replace(/\|/g, "");
+
+    // Build social links from settings
+    const socialLinks = [
+        { icon: Instagram, href: settings.instagram_url || "#", label: "Instagram" },
+        { icon: Facebook, href: settings.facebook_url || "#", label: "Facebook" },
+        { icon: Twitter, href: settings.twitter_url || "#", label: "Twitter" },
+    ].filter(link => link.href !== "#"); // Only show if URL exists
 
     return (
         <footer className="border-t border-border bg-muted/30">
@@ -39,28 +42,30 @@ export default function Footer() {
                         <Link href="/" className="flex items-center gap-2">
                             <Coffee className="h-8 w-8 text-primary" />
                             <span className="font-heading text-2xl font-bold tracking-tight text-foreground">
-                                ARC<span className="text-primary">offee</span>
+                                {settings.store_name.split('|')[0]}
+                                <span className="text-primary">{settings.store_name.split('|')[1] || ""}</span>
                             </span>
                         </Link>
                         <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-                            Nikmati pengalaman kopi premium dengan kustomisasi sesuai selera Anda.
-                            Setiap cangkir dibuat dengan cinta dan biji kopi pilihan terbaik.
+                            {settings.store_description}
                         </p>
                         {/* Social Links */}
-                        <div className="mt-6 flex gap-4">
-                            {socialLinks.map((social) => (
-                                <a
-                                    key={social.label}
-                                    href={social.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-secondary-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
-                                >
-                                    <social.icon className="h-5 w-5" />
-                                    <span className="sr-only">{social.label}</span>
-                                </a>
-                            ))}
-                        </div>
+                        {socialLinks.length > 0 && (
+                            <div className="mt-6 flex gap-4">
+                                {socialLinks.map((social) => (
+                                    <a
+                                        key={social.label}
+                                        href={social.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-secondary-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                                    >
+                                        <social.icon className="h-5 w-5" />
+                                        <span className="sr-only">{social.label}</span>
+                                    </a>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Menu Links */}
@@ -119,7 +124,7 @@ export default function Footer() {
                 <div className="mt-12 border-t border-border pt-8">
                     <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                         <p className="text-sm text-muted-foreground">
-                            © {currentYear} ARCoffee. Semua hak dilindungi.
+                            © {currentYear} {cleanStoreName}. Semua hak dilindungi.
                         </p>
                         <p className="text-sm text-muted-foreground">
                             Dibuat dengan ☕ di Indonesia

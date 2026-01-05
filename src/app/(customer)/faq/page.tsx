@@ -1,3 +1,4 @@
+import { getSettings } from "@/lib/supabase/queries";
 import { Metadata } from "next";
 import {
     Accordion,
@@ -9,83 +10,91 @@ import { Coffee, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export const metadata: Metadata = {
-    title: "FAQ - Pertanyaan Umum | ARCoffee",
-    description: "Temukan jawaban untuk pertanyaan umum tentang ARCoffee, menu, pemesanan, dan layanan kami.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getSettings();
+    const cleanStoreName = settings.store_name.replace(/\|/g, "");
 
-const faqs = [
-    {
-        category: "Pemesanan",
-        items: [
-            {
-                question: "Bagaimana cara memesan di ARCoffee?",
-                answer: "Anda dapat memesan melalui website kami dengan memilih menu, menambahkan ke keranjang, dan melakukan checkout. Kami juga menerima pemesanan langsung di toko.",
-            },
-            {
-                question: "Apakah bisa pesan untuk take away?",
-                answer: "Ya, semua menu kami tersedia untuk take away. Pilih opsi 'Take Away' saat checkout.",
-            },
-            {
-                question: "Berapa lama waktu pembuatan pesanan?",
-                answer: "Rata-rata waktu pembuatan adalah 5-10 menit tergantung kompleksitas pesanan dan antrian.",
-            },
-        ],
-    },
-    {
-        category: "Menu & Kustomisasi",
-        items: [
-            {
-                question: "Apakah bisa request custom menu?",
-                answer: "Tentu! Anda bisa kustomisasi level gula, es, dan menambahkan topping sesuai selera saat memesan.",
-            },
-            {
-                question: "Apakah ada menu untuk vegetarian/vegan?",
-                answer: "Ya, kami memiliki beberapa pilihan menu non-dairy dan vegan. Cek bagian menu untuk detail lebih lanjut.",
-            },
-            {
-                question: "Apakah biji kopi yang digunakan?",
-                answer: "Kami menggunakan biji kopi premium dari berbagai daerah di Indonesia, termasuk Aceh Gayo, Toraja, dan Bali Kintamani.",
-            },
-        ],
-    },
-    {
-        category: "Pembayaran",
-        items: [
-            {
-                question: "Metode pembayaran apa saja yang diterima?",
-                answer: "Kami menerima pembayaran tunai, kartu debit/kredit, dan e-wallet (GoPay, OVO, Dana, ShopeePay).",
-            },
-            {
-                question: "Apakah ada biaya tambahan?",
-                answer: "Tidak ada biaya tambahan untuk pemesanan di toko. Untuk delivery, akan ada biaya pengiriman sesuai jarak.",
-            },
-        ],
-    },
-    {
-        category: "Lainnya",
-        items: [
-            {
-                question: "Apakah ARCoffee buka setiap hari?",
-                answer: "Ya, kami buka setiap hari dari pukul 08.00 - 22.00 WIB.",
-            },
-            {
-                question: "Apakah ada program loyalitas?",
-                answer: "Saat ini kami sedang mengembangkan program loyalitas untuk pelanggan setia. Stay tuned!",
-            },
-            {
-                question: "Bagaimana cara memberikan feedback?",
-                answer: "Anda bisa menghubungi kami melalui halaman Kontak atau media sosial kami. Kami sangat menghargai setiap masukan!",
-            },
-        ],
-    },
-];
+    return {
+        title: "FAQ - Pertanyaan Umum",
+        description: `Temukan jawaban untuk pertanyaan umum tentang ${cleanStoreName}, menu, pemesanan, dan layanan kami.`,
+    };
+}
 
-export default function FAQPage() {
+export default async function FAQPage() {
+    const settings = await getSettings();
+    const cleanStoreName = settings.store_name.replace(/\|/g, "");
+
+    const faqs = [
+        {
+            category: "Pemesanan",
+            items: [
+                {
+                    question: `Bagaimana cara memesan di ${cleanStoreName}?`,
+                    answer: "Anda dapat memesan melalui website kami dengan memilih menu, menambahkan ke keranjang, dan melakukan checkout. Kami juga menerima pemesanan langsung di toko.",
+                },
+                {
+                    question: "Apakah bisa pesan untuk take away?",
+                    answer: "Ya, semua menu kami tersedia untuk take away. Pilih opsi 'Take Away' saat checkout.",
+                },
+                {
+                    question: "Berapa lama waktu pembuatan pesanan?",
+                    answer: "Rata-rata waktu pembuatan adalah 5-10 menit tergantung kompleksitas pesanan dan antrian.",
+                },
+            ],
+        },
+        {
+            category: "Menu & Kustomisasi",
+            items: [
+                {
+                    question: "Apakah bisa request custom menu?",
+                    answer: "Tentu! Anda bisa kustomisasi level gula, es, dan menambahkan topping sesuai selera saat memesan.",
+                },
+                {
+                    question: "Apakah ada menu untuk vegetarian/vegan?",
+                    answer: "Ya, kami memiliki beberapa pilihan menu non-dairy dan vegan. Cek bagian menu untuk detail lebih lanjut.",
+                },
+                {
+                    question: "Apakah biji kopi yang digunakan?",
+                    answer: "Kami menggunakan biji kopi premium dari berbagai daerah di Indonesia, termasuk Aceh Gayo, Toraja, dan Bali Kintamani.",
+                },
+            ],
+        },
+        {
+            category: "Pembayaran",
+            items: [
+                {
+                    question: "Metode pembayaran apa saja yang diterima?",
+                    answer: "Kami menerima pembayaran tunai, kartu debit/kredit, dan e-wallet (GoPay, OVO, Dana, ShopeePay).",
+                },
+                {
+                    question: "Apakah ada biaya tambahan?",
+                    answer: "Tidak ada biaya tambahan untuk pemesanan di toko. Untuk delivery, akan ada biaya pengiriman sesuai jarak.",
+                },
+            ],
+        },
+        {
+            category: "Lainnya",
+            items: [
+                {
+                    question: `Apakah ${cleanStoreName} buka setiap hari?`,
+                    answer: "Ya, kami buka setiap hari dari pukul 08.00 - 22.00 WIB.",
+                },
+                {
+                    question: "Apakah ada program loyalitas?",
+                    answer: "Saat ini kami sedang mengembangkan program loyalitas untuk pelanggan setia. Stay tuned!",
+                },
+                {
+                    question: "Bagaimana cara memberikan feedback?",
+                    answer: "Anda bisa menghubungi kami melalui halaman Kontak atau media sosial kami. Kami sangat menghargai setiap masukan!",
+                },
+            ],
+        },
+    ];
+
     return (
-        <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+        <div className="min-h-screen bg-linear-to-b from-background to-muted/30">
             {/* Hero Section */}
-            <section className="border-b border-border bg-gradient-to-br from-primary/5 via-background to-accent/5">
+            <section className="border-b border-border bg-linear-to-br from-primary/5 via-background to-accent/5">
                 <div className="container mx-auto px-4 py-16 md:py-24">
                     <div className="mx-auto max-w-3xl text-center">
                         <div className="mb-6 flex justify-center">
@@ -97,7 +106,7 @@ export default function FAQPage() {
                             Pertanyaan Umum
                         </h1>
                         <p className="mt-6 text-lg text-muted-foreground">
-                            Temukan jawaban untuk pertanyaan yang sering ditanyakan tentang ARCoffee
+                            Temukan jawaban untuk pertanyaan yang sering ditanyakan tentang {cleanStoreName}
                         </p>
                     </div>
                 </div>

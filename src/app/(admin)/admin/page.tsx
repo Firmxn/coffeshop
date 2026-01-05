@@ -7,13 +7,15 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPrice } from "@/lib/utils";
-import { getAllOrders } from "@/lib/supabase/queries";
+import { getAllOrders, getSettings } from "@/lib/supabase/queries";
 import { OrderStatus } from "@/types";
 
 export const revalidate = 0; // Disable cache
 
 export default async function AdminDashboardPage() {
     const orders = await getAllOrders();
+    const settings = await getSettings();
+    const cleanStoreName = settings.store_name.replace(/\|/g, "");
 
     // Hitung statistik
     const stats = {
@@ -56,7 +58,7 @@ export default async function AdminDashboardPage() {
             {/* Header */}
             <div>
                 <h1 className="font-heading text-2xl font-bold md:text-3xl">Dashboard</h1>
-                <p className="text-muted-foreground">Selamat datang di panel admin ARCoffee</p>
+                <p className="text-muted-foreground">Selamat datang di panel admin {cleanStoreName}</p>
             </div>
 
             {/* Stats Cards */}

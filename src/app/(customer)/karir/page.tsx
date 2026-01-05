@@ -1,81 +1,90 @@
+import { getSettings } from "@/lib/supabase/queries";
 import { Metadata } from "next";
 import { Briefcase, Users, TrendingUp, Heart, Coffee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-    title: "Karir | ARCoffee",
-    description: "Bergabunglah dengan tim ARCoffee dan kembangkan karir Anda di industri kopi. Lihat lowongan kerja yang tersedia.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getSettings();
+    const cleanStoreName = settings.store_name.replace(/\|/g, "");
 
-const benefits = [
-    {
-        icon: TrendingUp,
-        title: "Pengembangan Karir",
-        description: "Program pelatihan dan kesempatan berkembang bersama perusahaan",
-    },
-    {
-        icon: Users,
-        title: "Tim yang Solid",
-        description: "Bekerja dengan tim yang suportif dan penuh semangat",
-    },
-    {
-        icon: Heart,
-        title: "Work-Life Balance",
-        description: "Jadwal kerja yang fleksibel dan lingkungan kerja yang nyaman",
-    },
-    {
-        icon: Coffee,
-        title: "Kopi Gratis",
-        description: "Nikmati kopi premium gratis setiap hari untuk karyawan",
-    },
-];
+    return {
+        title: "Karir",
+        description: `Bergabunglah dengan tim ${cleanStoreName} dan kembangkan karir Anda di industri kopi. Lihat lowongan kerja yang tersedia.`,
+    };
+}
 
-const openPositions = [
-    {
-        title: "Barista",
-        location: "Jakarta Selatan",
-        type: "Full-time",
-        description: "Mencari barista berpengalaman yang passionate tentang kopi dan customer service.",
-        requirements: [
-            "Pengalaman minimal 1 tahun sebagai barista",
-            "Menguasai teknik brewing kopi",
-            "Komunikatif dan ramah",
-            "Bersedia bekerja shift",
-        ],
-    },
-    {
-        title: "Store Manager",
-        location: "Bandung",
-        type: "Full-time",
-        description: "Memimpin operasional toko dan mengembangkan tim untuk memberikan pelayanan terbaik.",
-        requirements: [
-            "Pengalaman minimal 2 tahun di posisi serupa",
-            "Leadership dan management skills",
-            "Memahami F&B operations",
-            "Berorientasi pada target",
-        ],
-    },
-    {
-        title: "Marketing Staff",
-        location: "Jakarta Selatan",
-        type: "Full-time",
-        description: "Mengembangkan strategi marketing dan meningkatkan brand awareness ARCoffee.",
-        requirements: [
-            "Pengalaman di digital marketing",
-            "Kreatif dan inovatif",
-            "Menguasai social media management",
-            "Memiliki portfolio marketing campaign",
-        ],
-    },
-];
+export default async function KarirPage() {
+    const settings = await getSettings();
+    const cleanStoreName = settings.store_name.replace(/\|/g, "");
 
-export default function KarirPage() {
+    const benefits = [
+        {
+            icon: TrendingUp,
+            title: "Pengembangan Karir",
+            description: "Program pelatihan dan kesempatan berkembang bersama perusahaan",
+        },
+        {
+            icon: Users,
+            title: "Tim yang Solid",
+            description: "Bekerja dengan tim yang suportif dan penuh semangat",
+        },
+        {
+            icon: Heart,
+            title: "Work-Life Balance",
+            description: "Jadwal kerja yang fleksibel dan lingkungan kerja yang nyaman",
+        },
+        {
+            icon: Coffee,
+            title: "Kopi Gratis",
+            description: "Nikmati kopi premium gratis setiap hari untuk karyawan",
+        },
+    ];
+
+    const openPositions = [
+        {
+            title: "Barista",
+            location: "Jakarta Selatan",
+            type: "Full-time",
+            description: "Mencari barista berpengalaman yang passionate tentang kopi dan customer service.",
+            requirements: [
+                "Pengalaman minimal 1 tahun sebagai barista",
+                "Menguasai teknik brewing kopi",
+                "Komunikatif dan ramah",
+                "Bersedia bekerja shift",
+            ],
+        },
+        {
+            title: "Store Manager",
+            location: "Bandung",
+            type: "Full-time",
+            description: "Memimpin operasional toko dan mengembangkan tim untuk memberikan pelayanan terbaik.",
+            requirements: [
+                "Pengalaman minimal 2 tahun di posisi serupa",
+                "Leadership dan management skills",
+                "Memahami F&B operations",
+                "Berorientasi pada target",
+            ],
+        },
+        {
+            title: "Marketing Staff",
+            location: "Jakarta Selatan",
+            type: "Full-time",
+            description: `Mengembangkan strategi marketing dan meningkatkan brand awareness ${cleanStoreName}.`,
+            requirements: [
+                "Pengalaman di digital marketing",
+                "Kreatif dan inovatif",
+                "Menguasai social media management",
+                "Memiliki portfolio marketing campaign",
+            ],
+        },
+    ];
+
     return (
-        <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+        <div className="min-h-screen bg-linear-to-b from-background to-muted/30">
             {/* Hero Section */}
-            <section className="border-b border-border bg-gradient-to-br from-primary/5 via-background to-accent/5">
+            <section className="border-b border-border bg-linear-to-br from-primary/5 via-background to-accent/5">
                 <div className="container mx-auto px-4 py-16 md:py-24">
                     <div className="mx-auto max-w-3xl text-center">
                         <div className="mb-6 flex justify-center">
@@ -84,7 +93,7 @@ export default function KarirPage() {
                             </div>
                         </div>
                         <h1 className="font-heading text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-                            Karir di <span className="text-primary">ARCoffee</span>
+                            Karir di <span className="text-primary">{cleanStoreName}</span>
                         </h1>
                         <p className="mt-6 text-lg text-muted-foreground">
                             Bergabunglah dengan kami dan jadilah bagian dari tim yang passionate tentang kopi
@@ -101,7 +110,7 @@ export default function KarirPage() {
                             Mengapa Bergabung dengan Kami?
                         </h2>
                         <p className="mt-4 text-muted-foreground">
-                            Benefit dan keuntungan menjadi bagian dari keluarga ARCoffee
+                            Benefit dan keuntungan menjadi bagian dari keluarga {cleanStoreName}
                         </p>
                     </div>
 
