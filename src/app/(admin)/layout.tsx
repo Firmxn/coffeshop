@@ -11,11 +11,21 @@ import {
     LogOut,
     Menu,
     X,
-    Layers
+    Layers,
+    UserCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { logoutAction } from "@/actions/auth-actions";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // Navigasi sidebar admin
 const sidebarLinks = [
@@ -92,20 +102,13 @@ export default function AdminLayout({
                     </nav>
 
                     {/* Footer */}
-                    <div className="p-4 border-t border-border space-y-2">
+                    <div className="p-4 border-t border-border">
                         <Link href="/" className="w-full block">
                             <Button variant="outline" className="w-full justify-start gap-3 text-muted-foreground">
+                                <LogOut className="h-5 w-5 rotate-180" /> {/* Rotate icon for 'Return' metaphor */}
                                 Ke Store Customer
                             </Button>
                         </Link>
-                        <Button
-                            variant="ghost"
-                            className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={async () => await logoutAction()}
-                        >
-                            <LogOut className="h-5 w-5" />
-                            Keluar
-                        </Button>
                     </div>
                 </div>
             </aside>
@@ -113,30 +116,56 @@ export default function AdminLayout({
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-h-screen">
                 {/* Top Bar */}
-                <header className="sticky top-0 z-30 h-16 bg-background/95 backdrop-blur border-b border-border flex items-center px-4 lg:px-6">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="lg:hidden mr-2"
-                        onClick={() => setIsSidebarOpen(true)}
-                    >
-                        <Menu className="h-5 w-5" />
-                    </Button>
-
-                    <div className="flex-1">
-                        <h1 className="font-heading text-lg font-semibold">Admin Panel</h1>
+                <header className="sticky top-0 z-30 h-16 bg-background/95 backdrop-blur border-b border-border flex items-center px-4 lg:px-6 justify-between">
+                    <div className="flex items-center gap-4">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="lg:hidden"
+                            onClick={() => setIsSidebarOpen(true)}
+                        >
+                            <Menu className="h-5 w-5" />
+                        </Button>
+                        {/* Judul Admin Panel dihapus sesuai request */}
                     </div>
 
-                    {/* Admin User Info (placeholder) */}
-                    <div className="flex items-center gap-3">
-                        <div className="text-right hidden sm:block">
-                            <p className="text-sm font-medium">Admin Barista</p>
-                            <p className="text-xs text-muted-foreground">admin@arcoffee.com</p>
-                        </div>
-                        <div className="h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
-                            AB
-                        </div>
-                    </div>
+                    {/* Admin User Info & Logout Dropdown */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="relative h-10 w-auto rounded-full px-2 hover:bg-muted">
+                                <div className="flex items-center gap-3">
+                                    <div className="text-right hidden sm:block">
+                                        <p className="text-sm font-medium">Admin Barista</p>
+                                        <p className="text-xs text-muted-foreground">admin@arcoffee.com</p>
+                                    </div>
+                                    <Avatar className="h-9 w-9 border">
+                                        <AvatarFallback className="bg-primary text-primary-foreground font-bold">AB</AvatarFallback>
+                                    </Avatar>
+                                </div>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56" align="end" forceMount>
+                            <DropdownMenuLabel className="font-normal">
+                                <div className="flex flex-col space-y-1">
+                                    <p className="text-sm font-medium leading-none">Admin Barista</p>
+                                    <p className="text-xs leading-none text-muted-foreground">
+                                        admin@arcoffee.com
+                                    </p>
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <Link href="/">
+                                <DropdownMenuItem>
+                                    <UserCircle className="mr-2 h-4 w-4" />
+                                    <span>Lihat Store</span>
+                                </DropdownMenuItem>
+                            </Link>
+                            <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer" onClick={() => logoutAction()}>
+                                <LogOut className="mr-2 h-4 w-4" />
+                                <span>Log out</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </header>
 
                 {/* Page Content */}
