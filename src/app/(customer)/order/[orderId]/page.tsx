@@ -1,25 +1,23 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { notFound } from "next/navigation";
 import {
     ArrowLeft,
     CheckCircle2,
     Clock,
-    Coffee,
     ChefHat,
     Package,
     XCircle,
     Phone,
-    Copy,
-    Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { formatPrice } from "@/data/mock-data";
-import { Order, OrderStatus } from "@/types";
-import { toast } from "sonner";
+import { formatPrice } from "@/lib/utils";
+import { getOrderByNumber } from "@/lib/supabase/queries";
+import { CopyOrderButton } from "./OrderActions";
+import { OrderStatus } from "@/types";
+
+interface PageProps {
+    params: Promise<{ orderId: string }>;
+}
 
 // Konfigurasi status order
 const statusConfig: Record<OrderStatus, {
@@ -63,44 +61,12 @@ const statusConfig: Record<OrderStatus, {
 // Urutan status untuk progress indicator
 const statusOrder: OrderStatus[] = ["pending", "processing", "ready", "completed"];
 
-export default function OrderStatusPage() {
-    const params = useParams();
-    const orderId = params.orderId as string;
-    const [order, setOrder] = useState<Order | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [copied, setCopied] = useState(false);
+export default async function OrderStatusPage({ params }: PageProps) {
+    const { orderId } = await params;
 
-    // Load order dari localStorage
-    useEffect(() => {
-        const loadOrder = () => {
-            const orders = JSON.parse(localStorage.getItem("arcoffee-orders") || "[]");
-            const foundOrder = orders.find((o: Order) => o.id === orderId);
-            setOrder(foundOrder || null);
-            setIsLoading(false);
-        };
+    // Fetch order from Supabase
+    const order = await getOrderByNumber(orderId);
 
-        loadOrder();
-    }, [orderId]);
-
-    // Copy order ID ke clipboard
-    const copyOrderId = async () => {
-        await navigator.clipboard.writeText(orderId);
-        setCopied(true);
-        toast.success("Order ID disalin!");
-        setTimeout(() => setCopied(false), 2000);
-    };
-
-    // Loading state
-    if (isLoading) {
-        return (
-            <div className="py-20 text-center">
-                <Coffee className="mx-auto h-16 w-16 text-primary animate-pulse" />
-                <p className="mt-4 text-muted-foreground">Memuat pesanan...</p>
-            </div>
-        );
-    }
-
-    // Order not found
     if (!order) {
         return (
             <div className="py-20 text-center">
@@ -154,13 +120,7 @@ export default function OrderStatusPage() {
                                 <p className="text-sm text-muted-foreground">Order ID</p>
                                 <p className="font-mono font-bold text-lg">{orderId}</p>
                             </div>
-                            <Button variant="outline" size="sm" onClick={copyOrderId}>
-                                {copied ? (
-                                    <Check className="h-4 w-4" />
-                                ) : (
-                                    <Copy className="h-4 w-4" />
-                                )}
-                            </Button>
+                            <CopyOrderButton orderId={orderId} />
                         </div>
 
                         {/* Progress Indicator */}
@@ -177,16 +137,16 @@ export default function OrderStatusPage() {
                                                 <div className="flex flex-col items-center">
                                                     <div
                                                         className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isCompleted
-                                                                ? "bg-primary text-primary-foreground"
-                                                                : "bg-muted text-muted-foreground"
+                                                            ? "bg-primary text-primary-foreground"
+                                                            : "bg-muted text-muted-foreground"
                                                             } ${isActive ? "ring-4 ring-primary/20" : ""}`}
                                                     >
                                                         <StepIcon className="h-5 w-5" />
                                                     </div>
                                                     <p
                                                         className={`mt-2 text-xs text-center ${isCompleted
-                                                                ? "text-foreground font-medium"
-                                                                : "text-muted-foreground"
+                                                            ? "text-foreground font-medium"
+                                                            : "text-muted-foreground"
                                                             }`}
                                                     >
                                                         {statusConfig[status].label.split(" ")[0]}
@@ -196,8 +156,8 @@ export default function OrderStatusPage() {
                                                 {index < statusOrder.length - 2 && (
                                                     <div
                                                         className={`absolute top-5 left-[calc(50%+20px)] w-[calc(100%-40px)] h-0.5 ${index < currentStatusIndex
-                                                                ? "bg-primary"
-                                                                : "bg-muted"
+                                                            ? "bg-primary"
+                                                            : "bg-muted"
                                                             }`}
                                                     />
                                                 )}
@@ -214,16 +174,16 @@ export default function OrderStatusPage() {
                             <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Nama</span>
-                                    <span className="font-medium">{order.customerName}</span>
+                                    <span className="font-medium">{order.customer_name}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Telepon</span>
                                     <a
-                                        href={`tel:${order.customerPhone}`}
+                                        href={`tel:${order.customer_phone}`}
                                         className="font-medium text-primary flex items-center gap-1"
                                     >
                                         <Phone className="h-3 w-3" />
-                                        {order.customerPhone}
+                                        {order.customer_phone}
                                     </a>
                                 </div>
                                 {order.notes && (
@@ -241,22 +201,31 @@ export default function OrderStatusPage() {
                         <div className="border-t border-border pt-6 mb-6">
                             <h3 className="font-heading font-semibold mb-3">Rincian Pesanan</h3>
                             <div className="space-y-3">
-                                {order.items.map((item, index) => (
+                                {order.order_items.map((item, index) => (
                                     <div
                                         key={index}
                                         className="flex justify-between py-2 border-b border-border last:border-0"
                                     >
                                         <div>
                                             <p className="font-medium">
-                                                {item.quantity}x {item.product.name}
+                                                {item.quantity}x {item.product_name}
                                             </p>
-                                            {item.selectedOptions.length > 0 && (
+                                            {item.order_item_options.length > 0 && (
                                                 <p className="text-sm text-muted-foreground">
-                                                    {item.selectedOptions.map((opt) => opt.name).join(", ")}
+                                                    {item.order_item_options
+                                                        .map((opt) => opt.option_name)
+                                                        .join(", ")}
+                                                </p>
+                                            )}
+                                            {item.notes && (
+                                                <p className="text-xs text-muted-foreground italic">
+                                                    "{item.notes}"
                                                 </p>
                                             )}
                                         </div>
-                                        <p className="font-medium">{formatPrice(item.subtotal)}</p>
+                                        <p className="font-medium">
+                                            {formatPrice(item.subtotal)}
+                                        </p>
                                     </div>
                                 ))}
                             </div>
@@ -266,7 +235,9 @@ export default function OrderStatusPage() {
                         <div className="border-t border-border pt-4">
                             <div className="flex justify-between text-lg font-bold">
                                 <span>Total</span>
-                                <span className="text-primary">{formatPrice(order.totalPrice)}</span>
+                                <span className="text-primary">
+                                    {formatPrice(order.total_price)}
+                                </span>
                             </div>
                         </div>
                     </div>

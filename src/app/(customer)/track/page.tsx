@@ -23,23 +23,9 @@ export default function TrackOrderPage() {
 
         setIsSearching(true);
 
-        // Cari order di localStorage
-        const orders = JSON.parse(localStorage.getItem("arcoffee-orders") || "[]");
-        const order = orders.find(
-            (o: { id: string }) => o.id.toLowerCase() === orderId.trim().toLowerCase()
-        );
-
-        // Simulasi delay pencarian
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        if (order) {
-            router.push(`/order/${order.id}`);
-        } else {
-            toast.error("Pesanan tidak ditemukan", {
-                description: "Pastikan Order ID yang Anda masukkan benar.",
-            });
-            setIsSearching(false);
-        }
+        // Langsung redirect ke halaman order detail
+        // Detail order akan di-fetch di sana (SSR)
+        router.push(`/order/${orderId.trim()}`);
     };
 
     return (

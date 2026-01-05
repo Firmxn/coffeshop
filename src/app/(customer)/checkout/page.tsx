@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ShoppingBag, User, Phone, FileText, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/stores/cart-store";
-import { formatPrice } from "@/data/mock-data";
+import { submitOrder } from "@/actions/order-actions";
+import { formatPrice } from "@/lib/utils";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -48,41 +49,60 @@ export default function CheckoutPage() {
     const onSubmit = async (data: CheckoutFormData) => {
         setIsSubmitting(true);
 
-        // Simulasi proses order (dummy - tanpa backend)
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        try {
+            // Mapping data untuk dikirim ke server action
+            const orderPayload = {
+                customerName: data.customerName,
+                customerPhone: data.customerPhone,
+                notes: data.notes,
+                totalPrice: totalPrice,
+                items: items.map((item) => ({
+                    productId: item.product.id,
+                    productName: item.product.name,
+                    productPrice: item.product.price,
+                    quantity: item.quantity,
+                    subtotal: item.subtotal,
+                    notes: item.notes,
+                    options: item.selectedOptions.map((opt) => ({
+                        optionId: opt.id,
+                        optionName: opt.name,
+                        extraPrice: opt.extraPrice,
+                    })),
+                })),
+            };
 
-        // Generate dummy order ID
-        const orderId = `ARC-${Date.now().toString(36).toUpperCase()}`;
+            // Call server action
+            const result = await submitOrder(orderPayload);
 
-        // Simpan order ke localStorage (temporary - nanti diganti Supabase)
-        const order = {
-            id: orderId,
-            customerName: data.customerName,
-            customerPhone: data.customerPhone,
-            notes: data.notes,
-            items: items,
-            totalPrice: totalPrice,
-            status: "pending",
-            createdAt: new Date().toISOString(),
-        };
+            if (!result.success || !result.orderNumber) {
+                throw new Error(result.error || "Gagal membuat pesanan");
+            }
 
-        // Simpan ke localStorage
-        const existingOrders = JSON.parse(localStorage.getItem("arcoffee-orders") || "[]");
-        localStorage.setItem("arcoffee-orders", JSON.stringify([...existingOrders, order]));
+            // Sukses
+            toast.success("Pesanan berhasil dibuat!", {
+                description: `Order ID: ${result.orderNumber}`,
+            });
 
-        // Clear cart
-        clearCart();
+            // Simpan Order ID ke localStorage untuk history (opsional)
+            const history = JSON.parse(localStorage.getItem("arcoffee-history") || "[]");
+            localStorage.setItem("arcoffee-history", JSON.stringify([...history, result.orderNumber]));
 
-        // Show success toast
-        toast.success("Pesanan berhasil dibuat!", {
-            description: `Order ID: ${orderId}`,
-        });
+            // Clear cart
+            clearCart();
 
-        setIsSubmitting(false);
+            // Redirect ke halaman status order
+            router.push(`/order/${result.orderNumber}`);
 
-        // Redirect ke halaman status order
-        router.push(`/order/${orderId}`);
+        } catch (error) {
+            console.error("Checkout error:", error);
+            toast.error("Gagal memproses pesanan", {
+                description: error instanceof Error ? error.message : "Terjadi kesalahan sistem",
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
 
     // Redirect jika cart kosong
     if (items.length === 0) {
@@ -147,8 +167,8 @@ export default function CheckoutPage() {
                                             type="text"
                                             placeholder="Masukkan nama Anda"
                                             className={`w-full rounded-lg border px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring ${errors.customerName
-                                                    ? "border-destructive"
-                                                    : "border-input bg-background"
+                                                ? "border-destructive"
+                                                : "border-input bg-background"
                                                 }`}
                                             {...register("customerName")}
                                         />
@@ -174,8 +194,8 @@ export default function CheckoutPage() {
                                                 type="tel"
                                                 placeholder="08xxxxxxxxxx"
                                                 className={`w-full rounded-lg border pl-10 pr-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring ${errors.customerPhone
-                                                        ? "border-destructive"
-                                                        : "border-input bg-background"
+                                                    ? "border-destructive"
+                                                    : "border-input bg-background"
                                                     }`}
                                                 {...register("customerPhone")}
                                             />
