@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ARCoffee
 
-## Getting Started
+ARCoffee adalah aplikasi coffee shop berbasis Next.js yang menyediakan pengalaman pemesanan untuk pelanggan sekaligus panel admin untuk mengelola menu, pesanan, opsi kustomisasi, dan pengaturan toko. Aplikasi menggunakan Supabase sebagai backend (auth + database) dengan dukungan mock data untuk pengembangan lokal.
 
-First, run the development server:
+## Fitur Utama
+
+### Pelanggan
+- Jelajah menu per kategori, detail produk, dan opsi kustomisasi.
+- Keranjang belanja, checkout, dan pembuatan pesanan.
+- Halaman pelacakan status pesanan.
+- Halaman informasi seperti About, FAQ, Careers, Privacy, Contact, dan Locations.
+
+### Admin
+- Login admin melalui Supabase Auth.
+- Dashboard ringkas (statistik pesanan, pendapatan, dan pesanan terbaru).
+- Manajemen produk, kategori, dan opsi kustomisasi.
+- Manajemen pesanan serta pengaturan toko.
+
+## Teknologi
+
+- **Next.js App Router** untuk SSR/SSG dan routing.
+- **React 19** + **TypeScript**.
+- **Tailwind CSS** + Radix UI components.
+- **Supabase** (Auth + Postgres).
+- **Zustand** untuk state keranjang.
+- **React Hook Form** + **Zod** untuk validasi form.
+
+## Struktur Direktori
+
+```
+src/
+  actions/          # Server actions (auth, dll.)
+  app/              # App Router routes
+    (customer)/     # Halaman pelanggan
+    (admin)/admin/  # Panel admin
+    (auth)/         # Login admin
+  components/       # UI + shared components
+  data/             # Mock data untuk development
+  lib/              # Helper & integrasi Supabase
+  stores/           # Zustand store (cart)
+  types/            # Tipe data TypeScript
+supabase/
+  migrations/       # Migrasi DB
+  schema.sql        # Skema database
+```
+
+## Prasyarat
+
+- Node.js 18+ (atau sesuai standar Next.js terbaru).
+- Akun Supabase (untuk auth dan database).
+
+## Konfigurasi Environment
+
+Buat file `.env.local` di root proyek dengan variabel berikut:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+## Menjalankan Aplikasi
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Jalankan server development:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka `http://localhost:3000` di browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Script Penting
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` — Menjalankan server development.
+- `npm run build` — Build aplikasi untuk produksi.
+- `npm run start` — Menjalankan hasil build.
+- `npm run lint` — Menjalankan ESLint.
 
-## Learn More
+## Catatan Development
 
-To learn more about Next.js, take a look at the following resources:
+- Data mock tersedia di `src/data/mock-data.ts` untuk mempermudah pengembangan UI tanpa Supabase.
+- Untuk penggunaan penuh, pastikan tabel dan relasi Supabase sesuai dengan `supabase/schema.sql`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Aplikasi dapat di-deploy ke Vercel atau hosting lain yang mendukung Next.js. Pastikan env var Supabase diset di environment hosting.
